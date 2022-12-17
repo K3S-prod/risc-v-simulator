@@ -12,7 +12,7 @@ public:
     void fetchInstruction(uint64_t addr);
     uint64_t load(uint64_t addr);
     void  store(uint64_t  addr);
-    void loadELF(std::string& elfFileName);
+    int loadELF(std::string& elfFileName);
 };
 
 } // namespace sim
