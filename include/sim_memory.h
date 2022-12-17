@@ -16,7 +16,7 @@ public:
     void fetchInstruction(uint64_t addr);
     uint64_t load(uint64_t addr);
     void  store(uint64_t  addr);
-    int loadELF(std::string& elfFileName);
+    int loadELF(const std::string& elfFileName);
     void dump();
 
     ~Memory() {

@@ -10,7 +10,7 @@
 
 namespace sim {
     
-    int Memory::loadELF(std::string& elfFileName) {
+    int Memory::loadELF(const std::string& elfFileName) {
         ELFIO::elfio reader;
         if (!reader.load(elfFileName)) {
             std::cerr << "ERROR: could not load file " << elfFileName << std::endl;
