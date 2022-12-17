@@ -10,3 +10,4 @@ project(risc_v_simulator)
 find_package(GTest CONFIG REQUIRED)
 
 add_subdirectory(sources)
+add_subdirectory(tests)

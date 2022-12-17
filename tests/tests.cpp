@@ -28,3 +28,8 @@ TEST(sim, ELF_load) {
 
     free(memoryRef);
 }
+
+int main(int argc, char** argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
