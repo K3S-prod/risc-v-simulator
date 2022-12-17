@@ -2,6 +2,19 @@
 # RISC-V simulator written in C++
 
 # Prerequisites
+## Building googletest
+To succesfully run test, build googletest submodule.
+```shell
+cd third-party/googletest/
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+```
+
+
+## GPG key setup
 You can skip following step if you already have gpg key on your machine.
 
 Create gpg key locally (follow the CLI instructions)

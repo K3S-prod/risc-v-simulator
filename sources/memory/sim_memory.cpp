@@ -41,6 +41,9 @@ namespace sim {
                 auto segmentDataLen = segment->get_memory_size();
                 std::cout << "Segment data length: " << segmentDataLen << std::endl;
                     std::cout << "INFO: loading segment " << counter << " into memory..." << std::endl;
+                if (offset >= static_cast<uint64_t>(DRAM_SIZE)) {
+                    std::cerr << "ERROR: ELF file segments are to large. Maximum memory limit: " << DRAM_SIZE << std::endl;
+                }
                 memcpy(addrSpace + offset, segmentData, segmentDataLen);
                 offset += segmentDataLen;
             }
@@ -49,7 +52,6 @@ namespace sim {
         }
 
         dump();
-
         return 0;
     }
 

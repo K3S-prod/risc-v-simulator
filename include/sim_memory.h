@@ -1,7 +1,7 @@
 #pragma once
 
 #include <array>
-constexpr unsigned DRAM_LEN = 4096 * 1024;
+constexpr unsigned DRAM_SIZE = 4096 * 1024;
 
 namespace sim {
 
@@ -10,7 +10,7 @@ class Memory {
     uint64_t offset = 0x0;
 public:
     Memory() {
-        addrSpace = (char*) calloc(DRAM_LEN, sizeof(char));
+        addrSpace = (char*) calloc(DRAM_SIZE, sizeof(char));
     }
 
     void fetchInstruction(uint64_t addr);
