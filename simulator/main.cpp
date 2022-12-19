@@ -2,7 +2,7 @@
 #include <string>
 #include <iostream>
 
-#include "common.h"
+#include "simulator.h"
 
 
 int main(int argc, char** argv) {
@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
     }
 
     std::string elfFileName = std::string(argv[1]);
-    sim::State state;
+    sim::Simulator state;
     state.loadELF(elfFileName);
 
     state.getMemory().dump();

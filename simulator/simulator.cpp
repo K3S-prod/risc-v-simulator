@@ -2,14 +2,14 @@
 #include <elfio/elfio.hpp>
 
 #include "cpu.h"
-#include "common.h"
+#include "simulator.h"
 
 namespace sim {
-    void State::runSimulation() {
-        cpu.runPipeline();
+    void Simulator::runSimulation() {
+        cpu_.runPipeline();
     };
 
-    int State::loadELF(std::string& elfFileName) {
+    int Simulator::loadELF(std::string& elfFileName) {
         ELFIO::elfio reader;
         if (!reader.load(elfFileName)) {
             std::cerr << "ERROR: could not load file " << elfFileName << std::endl;
@@ -52,7 +52,7 @@ namespace sim {
             std::cout << "Segment memory size: " << std::hex << "0x" << segment->get_memory_size() << std::endl;
 
             if (counter == entrySegmentNum) {
-                memory.setEntry(size + entryOffset);
+                memory_.setEntry(size + entryOffset);
             }
 
             if (segment_type == ELFIO::PT_LOAD) {
@@ -63,16 +63,16 @@ namespace sim {
                 if (size >= static_cast<uint64_t>(DRAM_SIZE)) {
                     std::cerr << "ERROR: ELF file segments are to large. Maximum memory limit: " << DRAM_SIZE << std::endl;
                 }
-                memory.upload(size, segmentData, static_cast<size_t>(segmentDataLen));
+                memory_.upload(size, segmentData, static_cast<size_t>(segmentDataLen));
                 size += static_cast<size_t>(segmentDataLen);
             }
 
             counter++;
         }
 
-        memory.setSize(size);
+        memory_.setSize(size);
 
-        std::cout << "Entrypoint address: " << std::hex << memory.getEntry() << std::endl;
+        std::cout << "Entrypoint address: " << std::hex << memory_.getEntry() << std::endl;
 
         return 0;
     }

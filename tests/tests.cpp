@@ -11,7 +11,7 @@
 
 TEST(sim, ELF_load) {
     std::string elfFileName = std::string("../tests/fibbonacci");
-    sim::State state(elfFileName);
+    sim::Simulator state(elfFileName);
 
     const char* refFilename = "../tests/fibbonacci_decoded_ref.sim";
     FILE* referenceFile = fopen(refFilename, "rb");

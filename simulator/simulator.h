@@ -7,19 +7,21 @@
 
 namespace sim {
 
-class State {
-    std::string elfFileName;
-    sim::CPU cpu;
-    sim::Memory memory;
-    void runSimulation();
+class Simulator {
 public:
-    State() = default;
-    
+    Simulator() = default;
+
     Memory& getMemory() {
-        return memory;
+        return memory_;
     }
 
     int loadELF(std::string& elfFileName);
+
+private:
+    std::string elfFileName_;
+    sim::Cpu cpu_;
+    sim::Memory memory_;
+    void runSimulation();
 };
 
 } // namespace sim

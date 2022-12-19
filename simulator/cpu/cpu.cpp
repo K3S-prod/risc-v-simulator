@@ -3,7 +3,7 @@
 #include "cpu.h"
 
 namespace sim {
-    void CPU::runPipeline() {
+    void Cpu::runPipeline() {
         return;
     }
 } // namespace sim
