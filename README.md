@@ -34,6 +34,13 @@ Enable commits autosign
 git config commit.gpgsign true
 ```
 
+# Cloning repo
+Project includes submodules, so you need to clone them as well.
+```shell
+git clone --recursive git@github.com:K3S-prod/risc-v-simulator.git
+cd risc-v-simulator
+git submodule update --init --recursive
+```
 # Build from sources
 ```shell
 mkdir build && cd build
