@@ -41,7 +41,7 @@ git clone --recursive git@github.com:K3S-prod/risc-v-simulator.git
 cd risc-v-simulator
 git submodule update --init --recursive
 ```
-# Build from sources
+# Build
 ```shell
 mkdir build && cd build
 cmake ..
