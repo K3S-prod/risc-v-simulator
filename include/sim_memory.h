@@ -13,7 +13,11 @@ public:
     Memory() {
         addrSpace = (char*) calloc(DRAM_SIZE, sizeof(char));
     }
-
+    
+    char* getRawMemory() {
+        return addrSpace;
+    }
+    
     void fetchInstruction(uint64_t addr);
     uint64_t load(uint64_t addr);
     void  store(uint64_t  addr);

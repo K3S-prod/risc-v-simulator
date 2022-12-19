@@ -80,7 +80,7 @@ namespace sim {
         std::cout << "Memory offset: " << std::dec << offset << std::endl;
         std::cout << "Dumping memory from address 0x0..." << std::endl;
 
-        std::ofstream dumpFile("memory_dump.hex");
+        std::ofstream dumpFile("memory_dump.sim");
         if (dumpFile.is_open()) {
             dumpFile.write(addrSpace, offset);
             dumpFile.close();

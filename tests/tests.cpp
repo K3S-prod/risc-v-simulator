@@ -3,16 +3,17 @@
 #include <string>
 #include <cstdlib>
 #include <cassert>
+#include <fstream>
 #include <sys/stat.h>
 
 #include "common.h"
 
 
 TEST(sim, ELF_load) {
-    std::string elfFileName = std::string("fibbonaci");
+    std::string elfFileName = std::string("../tests/fibbonacci");
     sim::State state(elfFileName);
 
-    const char* refFilename = "fibbonaci_elf_segments_reference.sim";
+    const char* refFilename = "../tests/fibbonacci_decoded_ref.sim";
     FILE* referenceFile = fopen(refFilename, "rb");
     assert(referenceFile != NULL);
 
@@ -22,10 +23,11 @@ TEST(sim, ELF_load) {
     auto size = st.st_size;
     fread(memoryRef, sizeof(char), size, referenceFile);
 
-    const std::string testFilename = "fibbonaci";
+    const std::string testFilename = "../tests/fibbonacci";
     sim::Memory memory;
     memory.loadELF(testFilename);
 
+    fclose(referenceFile);
     free(memoryRef);
 }
 
