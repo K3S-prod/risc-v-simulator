@@ -13,7 +13,13 @@ class State {
     sim::Memory memory;
     void runSimulation();
 public:
-    State(std::string& elfFileName);
+    State() = default;
+    
+    Memory& getMemory() {
+        return memory;
+    }
+
+    int loadELF(std::string& elfFileName);
 };
 
 } // namespace sim
