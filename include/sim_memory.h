@@ -7,7 +7,8 @@ namespace sim {
 
 class Memory {
     char* addrSpace;
-    uint64_t offset = 0x0;
+    size_t offset = 0x0;
+    size_t entry = 0x0;
 public:
     Memory() {
         addrSpace = (char*) calloc(DRAM_SIZE, sizeof(char));
