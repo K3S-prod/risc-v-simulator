@@ -22,8 +22,13 @@ namespace sim {
         std::cout << "Done." << std::endl;
     }
 
-    void Memory::upload(size_t offset, const char* data, size_t len) {
+    void Memory::upload(size_t offset, const void* data, size_t len) {
         memcpy(addrSpace_ + offset, data, len);
     }
+
+    void Memory::Load(size_t offset, void* dst, size_t len) {
+        memcpy(dst, addrSpace_ + offset, len);
+    }
+
 
 } // namespace sim

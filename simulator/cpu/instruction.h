@@ -3,40 +3,23 @@
 #include <iostream>
 #include <cstdint>
 
-enum class Opcode {
-    ADD_SUB = 0,
-    SLL = 1,
-	SLT = 2,
-	SLTU = 3,
-	XOR = 4,
-	SRL_SRA = 5,
-	OR = 6,
-	AND = 7
-};
+
+
 
 namespace sim {
 
-Opcode GetOpcode(uint32_t inst) {
-    const int OPCODE_SHIFT = 0;
-    const int OPCODE_MASK = 0x7;
+enum class Opcode {
+    ADDI = 0b00010011,
+};
 
-    Opcode opcode {(inst >> OPCODE_SHIFT) & OPCODE_MASK};
-
-    switch (opcode) {
-        case Opcode::ADD_SUB: {
-            std::cout << "found ADD_SUB" << std::endl;
-        }
-    }
-
-    return opcode;
-}
+Opcode GetOpcode(uint32_t inst);
 
 class Instruction {
 public:
     Instruction(uint32_t inst);
     virtual ~Instruction();
 
-    int GetOpcode() { return opcode_; }
+    //int GetOpcode() { return opcode_; }
     virtual void Apply() = 0;
 
 private:

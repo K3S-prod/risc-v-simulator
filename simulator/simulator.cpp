@@ -4,10 +4,30 @@
 #include "cpu.h"
 #include "simulator.h"
 
+
 namespace sim {
     void Simulator::runSimulation() {
-        cpu_.runPipeline();
+        cpu_.SetPC(memory_.getEntry());
+        // Move on function "main()" (temporarily)
+        cpu_.MovePC(0xCC);
+
+        std::cout << "PC = " << cpu_.GetPC() << "\n";
+        std::cout << "Dump memory PC = " << cpu_.GetPC() << " Value " << *(uint32_t*)(memory_.getRawMemory() + cpu_.GetPC()) << "\n";
+        memory_.Load(cpu_.GetPC(), &cpu_.cache_, sizeof(uint32_t));
+        std::cout << "Load in cache " << std::hex << cpu_.cache_ << std::dec << "\n";
+
+        FetchAndExecude();
     };
+
+    void Simulator::FetchAndExecude() {
+        uint32_t inst = cpu_.cache_;
+        auto opc = GetOpcode(inst);
+        switch (opc) {
+            case Opcode::ADDI: {
+                std::cout << "Execute ADDI\n";
+            }
+        }
+    }
 
     int Simulator::loadELF(std::string& elfFileName) {
         ELFIO::elfio reader;

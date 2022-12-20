@@ -11,8 +11,22 @@ class Cpu {
 public:
     Cpu() = default;
     void runPipeline();
-    void RunInterpreter();
 
+    uint64_t GetPC() {
+        return pc_;
+    }
+
+    void SetPC(uint64_t pos) {
+        pc_ = pos;
+    }
+
+    void MovePC(int64_t offset) {
+        // TODO add checks
+        pc_ += offset;
+    }
+
+    // Temporary contains only one instruction
+    uint32_t cache_;
 private:
     uint64_t pc_;
 

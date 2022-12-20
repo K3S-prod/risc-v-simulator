@@ -14,10 +14,11 @@ int main(int argc, char** argv) {
     }
 
     std::string elfFileName = std::string(argv[1]);
-    sim::Simulator state;
-    state.loadELF(elfFileName);
+    sim::Simulator simulator;
+    simulator.loadELF(elfFileName);
 
-    state.getMemory().dump();
+    simulator.runSimulation();
+    simulator.getMemory().dump();
 
     return 0;
 }

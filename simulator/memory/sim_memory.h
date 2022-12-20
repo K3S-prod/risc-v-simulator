@@ -23,7 +23,9 @@ public:
         entry_ = e_entry;
     }
 
-    void upload(size_t offset, const char* data, size_t len);
+    void upload(size_t offset, const void* data, size_t len);
+
+    void Load(size_t offset, void* dst, size_t len);
 
     void setSize(size_t e_size) {
         size_ = e_size;
