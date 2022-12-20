@@ -54,7 +54,6 @@ public:
     }
     virtual ~RegisterInstruction();
 
-
     virtual void Apply() override {
         std::cout << "Apply register instruction" << std::endl;
     }
@@ -84,6 +83,17 @@ private:
 
 class ImmediateInstruction : public Instruction {
 public:
+    ImmediateInstruction(uint32_t inst) : Instruction(inst) {
+        reg_destination_ = (inst >> DESTINATION_REGISTER_SHIFT) & DESTINATION_REGISTER_MASK;
+        funct3_ = (inst >> FUNCT3_SHIFT) & FUNCT3_MASK;
+        reg_source_first_ = (inst >> SOURCE_REGISTER_FIRST_SHIFT) & SOURCE_REGISTER_FIRST_MASK;
+        immediate_ = (inst >> IMMEDIATE_SHIFT) & IMMEDIATE_MASK;
+    }
+    virtual ~ImmediateInstruction();
+
+    virtual void Apply() override {
+        std::cout << "Apply immediate instruction" << std::endl;
+    }
     static const int DESTINATION_REGISTER_SHIFT = 7;
     static const int DESTINATION_REGISTER_MASK = 0x1F;
 
