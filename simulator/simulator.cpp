@@ -39,6 +39,7 @@ namespace sim {
         }
         counter = 0;
         size_t size = 0;
+        unsigned loadedSegmentNum = 0;
 
         for (const auto& segment: reader.segments) {
             std::cout << "Segment [" << counter << "]:" << "\t";
@@ -64,7 +65,12 @@ namespace sim {
                     std::cerr << "ERROR: ELF file segments are to large. Maximum memory limit: " << DRAM_SIZE << std::endl;
                 }
                 memory_.upload(size, segmentData, static_cast<size_t>(segmentDataLen));
+
+                auto permission = segment->get_flags();
+                std::cout << "Permission: " << std::hex << "0x" << permission << std::endl;
+                memory_.setMemoryRegion(loadedSegmentNum, size, size + static_cast<size_t>(segmentDataLen), permission);
                 size += static_cast<size_t>(segmentDataLen);
+                ++loadedSegmentNum;
             }
 
             counter++;
