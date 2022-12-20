@@ -16,11 +16,11 @@ enum class Opcode {
 
 namespace sim {
 
-uint8_t GetOpcode(uint32_t inst) {
+Opcode GetOpcode(uint32_t inst) {
     const int OPCODE_SHIFT = 0;
     const int OPCODE_MASK = 0x7;
 
-    uint8_t opcode = (inst >> OPCODE_SHIFT) & OPCODE_MASK;
+    Opcode opcode {(inst >> OPCODE_SHIFT) & OPCODE_MASK};
 
     switch (opcode) {
         case Opcode::ADD_SUB: {
