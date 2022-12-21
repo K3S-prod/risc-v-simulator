@@ -2,6 +2,7 @@
 #include <elfio/elfio.hpp>
 #include <cstdlib>
 #include "elf_loader.h"
+#include "memory.h"
 
 namespace sim {
 
@@ -19,6 +20,7 @@ size_t ElfLoader::getEntryPoint() {
 }
 
 ElfLoader::ElfLoader(std::string& elfFileName) {
+    data_ = (char*) calloc(1, sizeof(DRAM_SIZE));   
     fileName_ = elfFileName;
     int ret = loadFromFile(elfFileName);
     if (ret != 0) {
@@ -64,6 +66,18 @@ size_t ElfLoader::recalculateEntryPoint(size_t entryPoint) {
 
     std::cout << "INFO: recalculated entrypoint: " << recalculatedEntryPoint << std::endl;
     return recalculatedEntryPoint;
+}
+
+void ElfLoader::loadData() {
+    size_t offset = 0;
+    size_t segmentsSize = 0;
+    for (const auto& segment: elfFile_.segments) {
+        if (segment->get_type() == ELFIO::PT_LOAD) {
+            auto segSize = segment->get_memory_size();
+            memcpy(offset, );
+            segmentsSize += static_cast<size_t>(segSize);
+        }
+    }
 }
 
 } // namespace sim

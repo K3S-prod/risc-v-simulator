@@ -8,6 +8,8 @@ namespace sim {
 class ElfLoader {
     std::string fileName_;
     ELFIO::elfio elfFile_;
+    char* data_;
+
     int loadFromFile(std::string& elfFileName);
 public:
     ElfLoader(std::string& elfFileName);
@@ -15,7 +17,10 @@ public:
     size_t recalculateEntryPoint(size_t entryPoint);
     unsigned calcEntrySegNum(size_t entryPoint);
     size_t calcEntrySegOffset(size_t entryPoint, unsigned segNum);
-    ~ElfLoader() = default;
+    void loadData();
+    ~ElfLoader() {
+        free(data_);
+    }
 };
 
 } // namespace sim
