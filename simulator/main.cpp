@@ -15,7 +15,6 @@ int main(int argc, char** argv) {
 
     std::string elfFileName = std::string(argv[1]);
     sim::Simulator state;
-    state.loadELF(elfFileName);
 
     state.getMemory().dump();
 

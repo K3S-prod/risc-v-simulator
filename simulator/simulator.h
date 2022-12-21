@@ -3,7 +3,7 @@
 #include <string>
 
 #include "cpu.h"
-#include "sim_memory.h"
+#include "memory.h"
 
 namespace sim {
 

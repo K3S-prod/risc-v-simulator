@@ -6,7 +6,7 @@
 
 namespace sim {
     void Simulator::runSimulation() {
-        cpu_.runPipeline();
+        return;
     };
 
     int Simulator::loadELF(std::string& elfFileName) {
@@ -63,7 +63,7 @@ namespace sim {
                 if (size >= static_cast<uint64_t>(DRAM_SIZE)) {
                     std::cerr << "ERROR: ELF file segments are to large. Maximum memory limit: " << DRAM_SIZE << std::endl;
                 }
-                memory_.upload(size, segmentData, static_cast<size_t>(segmentDataLen));
+                //memory_.loadMemory(size, segmentData, static_cast<size_t>(segmentDataLen));
                 size += static_cast<size_t>(segmentDataLen);
             }
 
