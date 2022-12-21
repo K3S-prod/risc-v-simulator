@@ -11,9 +11,12 @@
 
 namespace sim {
 
-int Memory::setFromElfLoader(ElfLoader& loader) {
-        // memcpy(memory_, )
-    return EXIT_SUCCESS;
+Memory::Memory(ElfLoader& loader) {
+    memory_ = (char*) calloc(DRAM_SIZE, sizeof(char));
+    auto data = loader.getData();
+    memcpy(memory_, data, loader.getDataSize());
+    entry_ = loader.getRecalcEntry();
+    size_ = loader.getDataSize();
 }
 
 // void Memory::dump() {

@@ -8,9 +8,9 @@ namespace sim {
 
 class Memory {
 public:
-    Memory() {
-        memory_ = (char*) calloc(DRAM_SIZE, sizeof(char));
-    }
+    Memory(ElfLoader& loader);
+
+    Memory() = default;
     
     char* getRawMemory() {
         return memory_;
@@ -28,10 +28,8 @@ public:
         size_ = size;
     }
 
-    int setFromElfLoader(ElfLoader& loader);
-
     ~Memory() {
-        free(memory_);
+        //free(memory_);
     }
 
 private:

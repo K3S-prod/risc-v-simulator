@@ -1,10 +1,21 @@
 
 #include <elfio/elfio.hpp>
 #include <cstdlib>
+#include <cassert>
 #include "elf_loader.h"
 #include "memory.h"
 
 namespace sim {
+
+ElfLoader::ElfLoader(std::string& elfFileName) {
+    data_ = (char*) calloc(DRAM_SIZE, sizeof(char));
+    assert(data_ != NULL);
+    fileName_ = elfFileName;
+    int ret = loadFromFile(elfFileName);
+    if (ret != 0) {
+        throw std::runtime_error("Failed to construct elf loader");
+    }
+}
 
 int ElfLoader::loadFromFile(std::string& elfFileName) {
     if (!elfFile_.load(elfFileName)) {
@@ -17,15 +28,6 @@ int ElfLoader::loadFromFile(std::string& elfFileName) {
 
 size_t ElfLoader::getEntryPoint() {
     return static_cast<size_t>(elfFile_.get_entry());
-}
-
-ElfLoader::ElfLoader(std::string& elfFileName) {
-    data_ = (char*) calloc(1, sizeof(DRAM_SIZE));   
-    fileName_ = elfFileName;
-    int ret = loadFromFile(elfFileName);
-    if (ret != 0) {
-        throw std::runtime_error("Failed to construct elf loader");
-    }
 }
 
 unsigned ElfLoader::calcEntrySegNum(size_t entryPoint) {
@@ -50,7 +52,7 @@ size_t ElfLoader::recalculateEntryPoint(size_t entryPoint) {
     std::cout << "INFO: entry point in segment number: " << entrySegNum << std::endl;
     
     auto entrySegOffset = calcEntrySegOffset(entryPoint, entrySegNum);
-    std::cout << "INFO: entry offset: " << entrySegOffset << std::endl;
+    std::cout << "INFO: entry offset: " << std::hex << entrySegOffset << std::endl;
 
     size_t recalculatedEntryPoint = 0;
     size_t segmentsSize = 0;
@@ -64,20 +66,23 @@ size_t ElfLoader::recalculateEntryPoint(size_t entryPoint) {
         }
     }
 
-    std::cout << "INFO: recalculated entrypoint: " << recalculatedEntryPoint << std::endl;
+    std::cout << "INFO: recalculated entrypoint: " << std::hex << recalculatedEntryPoint << std::endl;
     return recalculatedEntryPoint;
 }
 
 void ElfLoader::loadData() {
-    size_t offset = 0;
-    size_t segmentsSize = 0;
+    size_t size = 0;
     for (const auto& segment: elfFile_.segments) {
         if (segment->get_type() == ELFIO::PT_LOAD) {
+            auto segAddr = segment->get_virtual_address();
             auto segSize = segment->get_memory_size();
-            memcpy(offset, );
-            segmentsSize += static_cast<size_t>(segSize);
+            auto segData = segment->get_data();
+            std::cout << "INFO: loading segment at address " << segAddr << ", size: " << segSize << std::endl;
+            memcpy(data_ + size, segData, segSize);
+            size += static_cast<size_t>(segSize);
         }
     }
+    dataSize_ = size;
 }
 
 } // namespace sim
