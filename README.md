@@ -47,3 +47,16 @@ mkdir build && cd build
 cmake ..
 make
 ```
+
+# Run
+Running tests:
+```shell
+cd build/bin
+./tests
+```
+
+Running simulator:
+```shell
+cd build/bin
+./simulator <elf_filename>
+```
