@@ -1,7 +1,9 @@
 
 #include <gtest/gtest.h>
+
 #include "elf_loader.h"
 #include "memory.h"
+#include "simulator.h"
 
 TEST(Elf_loader, Elf_loader_basic_construct) {
     std::string fileName = "fibbonacci";
@@ -33,6 +35,12 @@ TEST(Memory, memory_init) {
     sim::Memory memory(loader);
     ASSERT_EQ(memory.getEntry(), 0x608);
     ASSERT_EQ(memory.getSize(), 2933);
+}
+
+TEST(Sim, integration) {
+    std::string elfFileName = "fibbonacci";
+    sim::Simulator state(elfFileName);
+    state.runSimulation();
 }
 
 int main(int argc, char** argv) {

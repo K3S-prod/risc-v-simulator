@@ -7,7 +7,7 @@
 #include <elfio/elfio.hpp>
 
 #include "memory.h"
-#include"elf_loader.h"
+#include "elf_loader.h"
 
 namespace sim {
 

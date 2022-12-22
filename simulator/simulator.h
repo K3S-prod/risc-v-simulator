@@ -8,19 +8,12 @@
 namespace sim {
 
 class Simulator {
-public:
-    Simulator() = default;
-
-    Memory& getMemory() {
-        return memory_;
-    }
-
-    int loadELF(std::string& elfFileName);
-
-private:
-    std::string elfFileName_;
+    sim::ElfLoader loader_;
     sim::Cpu cpu_;
     sim::Memory memory_;
+
+public:
+    Simulator(std::string& elfFileName);
     void runSimulation();
 };
 
