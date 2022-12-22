@@ -9,8 +9,8 @@ namespace sim {
 class Memory {
 public:
     Memory(ElfLoader& loader);
-
     Memory() = default;
+    void dump();
     
     char* getRawMemory() {
         return memory_;
@@ -33,7 +33,7 @@ public:
     }
 
     ~Memory() {
-        //free(memory_);
+        free(memory_);
     }
 
 private:

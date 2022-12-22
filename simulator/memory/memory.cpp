@@ -19,20 +19,16 @@ Memory::Memory(ElfLoader& loader) {
     size_ = loader.getDataSize();
 }
 
-// void Memory::dump() {
-//     std::cout << "Memory offset: " << std::dec << size_ << std::endl;
-//     std::cout << "Dumping memory from address 0x0..." << std::endl;
+void Memory::dump() {
+    std::cout << "Memory size: " << std::dec << size_ << std::endl;
+    std::cout << "Dumping memory from address 0x0..." << std::endl;
 
-//     std::ofstream dumpFile("memory_dump.sim");
-//     if (dumpFile.is_open()) {
-//         dumpFile.write(addrSpace_, size_);
-//         dumpFile.close();
-//     }
-//     std::cout << "Done." << std::endl;
-// }
-
-// void Memory::loadMemory(size_t offset, const char* data, size_t len) {
-//     memcpy(addrSpace_ + offset, data, len);
-// }
+    std::ofstream dumpFile("memory_dump.sim");
+    if (dumpFile.is_open()) {
+        dumpFile.write(memory_, size_);
+        dumpFile.close();
+    }
+    std::cout << "Done." << std::endl;
+}
 
 } // namespace sim
