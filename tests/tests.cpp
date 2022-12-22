@@ -31,6 +31,8 @@ TEST(Memory, memory_init) {
     loader.loadData();
 
     sim::Memory memory(loader);
+    ASSERT_EQ(memory.getEntry(), 0x608);
+    ASSERT_EQ(memory.getSize(), 2933);
 }
 
 int main(int argc, char** argv) {

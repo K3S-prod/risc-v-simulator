@@ -28,6 +28,10 @@ public:
         size_ = size;
     }
 
+    size_t getSize() {
+        return size_;
+    }
+
     ~Memory() {
         //free(memory_);
     }
