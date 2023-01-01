@@ -19,14 +19,15 @@ Memory::Memory(ElfLoader& loader) {
     size_ = loader.getDataSize();
 }
 
-char* Memory::fetchInstruction(uint64_t addr) {
+char* Memory::fetchInstruction(VirtAddr virtAddr) {
     throw std::runtime_error("ERROR: MMU not implemented");
 }
 
-void Memory::store(uint64_t value, VirtAddr addr) {
-    throw std::runtime_error("ERROR: MMU not implemented");
+void Memory::store(uint64_t value, VirtAddr virtAddr) {
+    PhysAddr physAddr = mmu_.generatePhysAddr(virtAddr);
 }
-uint64_t Memory::load(VirtAddr addr) {
+
+uint64_t Memory::load(VirtAddr virtAddr) {
     throw std::runtime_error("ERROR: MMU not implemented");
 }
 

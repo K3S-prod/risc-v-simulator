@@ -1,5 +1,5 @@
 
-set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/memory.cpp)
+set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/memory.cpp ${CMAKE_CURRENT_SOURCE_DIR}/mmu.cpp)
 target_sources(simulator PRIVATE ${SOURCES})
 target_include_directories(simulator PUBLIC ${PROJECT_BINARY_DIR}
                                          ${PROJECT_SOURCE_DIR}/third-party/ELFIO)
