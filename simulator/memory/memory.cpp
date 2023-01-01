@@ -19,16 +19,27 @@ Memory::Memory(ElfLoader& loader) {
     size_ = loader.getDataSize();
 }
 
+char* Memory::fetchInstruction(uint64_t addr) {
+    throw std::runtime_error("ERROR: MMU not implemented");
+}
+
+void Memory::store(uint64_t value, VirtAddr addr) {
+    throw std::runtime_error("ERROR: MMU not implemented");
+}
+uint64_t Memory::load(VirtAddr addr) {
+    throw std::runtime_error("ERROR: MMU not implemented");
+}
+
 void Memory::dump() {
-    std::cout << "Memory size: " << std::dec << size_ << std::endl;
-    std::cout << "Dumping memory from address 0x0..." << std::endl;
+    std::cout << "INFO: Memory size: " << std::dec << size_ << std::endl;
+    std::cout << "INFO: Dumping memory from address 0x0..." << std::endl;
 
     std::ofstream dumpFile("memory_dump.sim");
     if (dumpFile.is_open()) {
         dumpFile.write(memory_, size_);
         dumpFile.close();
     }
-    std::cout << "Done." << std::endl;
+    std::cout << "INFO: Done." << std::endl;
 }
 
 } // namespace sim

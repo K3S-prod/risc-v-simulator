@@ -2,19 +2,33 @@
 
 #include <array>
 #include "elf_loader.h"
-constexpr unsigned DRAM_SIZE = 4096 * 1024;
 
 namespace sim {
 
+// 4096 * 1024 = 4194304 = 2^22
+constexpr unsigned DRAM_SIZE = 4096 * 1024;
+// 4096 = 2^12
+constexpr unsigned PAGE_SIZE = 4096;
+
+/* MMU specs:
+    m = 2^22 - number of addresses in physical address space
+    n = 2^64 - number of addressed in virtual address space
+    p = 2^12 - page size
+*/
+
+using VirtAddr = uint64_t;
+
 class Memory {
+    char* memory_;
+    size_t size_ = 0x0;
+    size_t entry_ = 0x0;
 public:
     Memory(ElfLoader& loader);
     Memory() = default;
     void dump();
-    
-    char* getRawMemory() {
-        return memory_;
-    }
+    char* fetchInstruction(uint64_t addr);
+    void store(uint64_t value, VirtAddr addr);
+    uint64_t load(VirtAddr addr);
 
     size_t getEntry() {
         return entry_;
@@ -35,11 +49,6 @@ public:
     ~Memory() {
         free(memory_);
     }
-
-private:
-    char* memory_;
-    size_t size_ = 0x0;
-    size_t entry_ = 0x0;
 };
 
 } // namespace sim
