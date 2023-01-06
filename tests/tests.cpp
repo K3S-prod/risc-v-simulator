@@ -1,9 +1,9 @@
 
 #include <gtest/gtest.h>
-
 #include "elf_loader.h"
 #include "memory.h"
 #include "simulator.h"
+#include "mmu.h"
 
 TEST(Elf_loader, Elf_loader_basic_construct) {
     std::string fileName = "fibbonacci";
@@ -42,6 +42,25 @@ TEST(Sim, integration) {
     sim::Simulator state(elfFileName);
     state.runSimulation();
 }
+
+TEST(MMU, get_physical_address) {
+    sim::VirtAddr virtAddr = 0x3fc0;
+    sim::MMU mmu;
+    auto addr = mmu.generatePhysAddr(virtAddr);
+    std::cout << "INFO: MMU generated address: " << std::dec << addr << "(" <<
+                                             std::hex << addr << ")" << std::endl;
+    std::cout << "INFO: Memory limit: " << std::dec << sim::DRAM_SIZE << std::endl;
+    ASSERT_EQ(addr, 36800);
+}
+
+// TEST(MMU, get_physical_addresses_multiple) {
+//     sim::VirtAddr virtAddr = 0x1234567890abcdef;
+//     sim::MMU mmu;
+//     auto addr = mmu.generatePhysAddr(virtAddr);
+//     std::cout << "INFO: MMU generated address: " << std::dec << addr << "(" <<
+//                                              std::hex << addr << ")" << std::endl;
+                                             
+// }
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);

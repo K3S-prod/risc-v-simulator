@@ -8,6 +8,9 @@ namespace sim {
 // 4096 = 2^12
 constexpr unsigned PAGE_SIZE = 4096;
 
+// data offset in DRAM (2^15)
+constexpr unsigned DATA_OFFSET = 32768;
+
 // Pontentially addressable only last 22 bits
 using PhysAddr = uint32_t;
 using VirtAddr = uint64_t;
@@ -22,7 +25,8 @@ using VirtAddr = uint64_t;
 #define VPN_MASK 0xFFFFFFFFFFFFF000
 
 class MMU {
-std::unordered_map<bool, uint64_t> pageTable;
+std::unordered_map<VirtAddr, std::pair<bool, PhysAddr>> pageTable;
+
 public:
     PhysAddr generatePhysAddr(VirtAddr virtAddr);
     uint64_t getPPN(uint64_t VPN);
