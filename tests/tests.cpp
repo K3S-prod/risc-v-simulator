@@ -6,12 +6,12 @@
 #include "simulator.h"
 
 TEST(Elf_loader, Elf_loader_basic_construct) {
-    std::string fileName = "fibbonacci";
+    std::string fileName = "fibbonacci_riscv";
     sim::ElfLoader elf_loader(fileName);
 }
 
 TEST(Elf_loader, Elf_loader_entry) {
-    std::string fileName = "fibbonacci";
+    std::string fileName = "fibbonacci_riscv";
     sim::ElfLoader elf_loader(fileName);
     auto entryPoint = elf_loader.getEntryPoint();
 
@@ -19,7 +19,7 @@ TEST(Elf_loader, Elf_loader_entry) {
 }
 
 TEST(Elf_loader, Elf_loader_recalc_entry) {
-    std::string fileName = "fibbonacci";
+    std::string fileName = "fibbonacci_riscv";
     sim::ElfLoader elf_loader(fileName);
     auto entryPoint = elf_loader.getEntryPoint();
     auto recalc = elf_loader.recalculateEntryPoint(entryPoint);
@@ -28,7 +28,7 @@ TEST(Elf_loader, Elf_loader_recalc_entry) {
 }
 
 TEST(Memory, memory_init) {
-    std::string elfFileName = "fibbonacci";
+    std::string elfFileName = "fibbonacci_riscv";
     sim::ElfLoader loader(elfFileName);
     loader.loadData();
 
@@ -38,7 +38,7 @@ TEST(Memory, memory_init) {
 }
 
 TEST(Sim, integration) {
-    std::string elfFileName = "fibbonacci";
+    std::string elfFileName = "fibbonacci_riscv";
     sim::Simulator state(elfFileName);
     state.runSimulation();
 }
