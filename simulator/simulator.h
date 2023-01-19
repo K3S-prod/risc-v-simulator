@@ -1,20 +1,27 @@
 #pragma once
 
-#include <string>
+#include "simulator/memory/memory.h"
+#include "simulator/interpreter/interpreter.h"
 
-#include "cpu.h"
-#include "memory.h"
+#include <string>
 
 namespace sim {
 
 class Simulator {
-    sim::ElfLoader loader_;
-    sim::Cpu cpu_;
-    sim::Memory memory_;
 
 public:
-    Simulator(std::string& elfFileName);
-    void runSimulation();
+    Simulator(std::string& elfFileName) : loader_(elfFileName), memory_(loader_) {}
+    void runSimulation()
+    {
+        const auto *code = static_cast<const uint8_t *>(static_cast<const void *>(memory_.getRawMemory()));
+        interp_.Invoke(code, memory_.getEntry());
+    }
+
+private:
+    ElfLoader loader_;
+    Memory memory_;
+    Interpreter interp_;
+
 };
 
 } // namespace sim

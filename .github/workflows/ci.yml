@@ -22,5 +22,5 @@ jobs:
         make
     - name: test
       run: |
-        cd build/bin
-        ./tests
+        cd build
+        ./bin/tests

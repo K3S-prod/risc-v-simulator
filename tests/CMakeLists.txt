@@ -2,10 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 set(SOURCES tests.cpp)
 add_executable(tests ${SOURCES})
-target_link_libraries(tests PUBLIC sim_lib)
-target_include_directories(tests PUBLIC ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/simulator/elf-loader  
-                                        ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/simulator/)
-
+target_link_libraries(tests PUBLIC elf_loader memory simulator)
 
 include(FetchContent)   
 FetchContent_Declare(
@@ -28,4 +25,4 @@ gtest_discover_tests(tests)
 
 add_custom_command(TARGET tests POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${CMAKE_SOURCE_DIR}/tests/ $<TARGET_FILE_DIR:tests>)
+                       ${CMAKE_SOURCE_DIR}/tests/elfs $<TARGET_FILE_DIR:tests>/elfs)

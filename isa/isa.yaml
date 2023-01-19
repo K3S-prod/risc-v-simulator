@@ -1,0 +1,321 @@
+###
+#   riscv isa
+###
+
+signatures_definition:
+  R:
+   opcode: 7
+   rd: 5
+   funct_3: 3
+   rs1: 5
+   rs2: 5
+   funct_7: 7
+
+  I:
+    opcode: 7
+    rd: 5
+    funct_3: 3
+    rs1: 5
+    imm_11_0: 12
+
+  S:
+    opcode: 7
+    imm_4_0: 5
+    funct_3: 3
+    rs1: 5
+    rs2: 5
+    imm_11_5: 7
+
+  B:
+      opcode: 7
+      imm_11: 1
+      imm_4_1: 4
+      funct_3: 3
+      rs1: 5
+      rs2: 5
+      imm_10_5: 6
+      imm_12: 1
+
+  U:
+    opcode: 7
+    rd: 5
+    imm_31_12: 20
+
+  J:
+    opcode: 7
+    rd: 5
+    imm_19_12: 8
+    imm_11: 1
+    imm_10_1: 10
+    imm_20: 1
+
+# Format for atomic instructions (however, it isn't specified in ISA):
+  A:
+   opcode: 7
+   rd: 5
+   funct_3: 3
+   rs1: 5
+   rs2: 5
+   rl: 1
+   aq: 1
+   funct_5: 5
+
+extensions:
+  RV32I:
+    LUI:
+       signature: U
+       opcode: "0110111"
+    AUIPC:
+       signature: U
+       opcode: "0010111"
+    JAL:
+       signature: J
+       opcode: "1101111"
+    JALR:
+       signature: I
+       opcode: "1100111"
+       funct_3: "000"
+    BEQ:
+       signature: B
+       opcode: "1100011"
+       funct_3: "000"
+    BNE:
+       signature: B
+       opcode: "1100011"
+       funct_3: "001"
+    BLT:
+       signature: B
+       opcode: "1100011"
+       funct_3: "100"
+    BGE:
+       signature: B
+       opcode: "1100011"
+       funct_3: "101"
+    BLTU:
+       signature: B
+       opcode: "1100011"
+       funct_3: "110"
+    BGEU:
+       signature: B
+       opcode: "1100011"
+       funct_3: "111"
+    LB:
+       signature: I
+       opcode: "0000011"
+       funct_3: "000"
+    LH:
+       signature: I
+       opcode: "0000011"
+       funct_3: "001"
+    LW:
+       signature: I
+       opcode: "0000011"
+       funct_3: "010"
+    LBU:
+       signature: I
+       opcode: "0000011"
+       funct_3: "100"
+    LHU:
+       signature: I
+       opcode: "0000011"
+       funct_3: "101"
+    SB:
+       signature: S
+       opcode: "0100011"
+       funct_3: "000"
+    SH:
+       signature: S
+       opcode: "0100011"
+       funct_3: "001"
+    SW:
+       signature: S
+       opcode: "0100011"
+       funct_3: "010"
+    ADDI:
+       signature: I
+       opcode: "0010011"
+       funct_3: "000"
+    SLTI:
+       signature: I
+       opcode: "0010011"
+       funct_3: "010"
+    SLTIU:
+       signature: I
+       opcode: "0010011"
+       funct_3: "011"
+    XORI:
+       signature: I
+       opcode: "0010011"
+       funct_3: "100"
+    ORI:
+       signature: I
+       opcode: "0010011"
+       funct_3: "110"
+    ANDI:
+       signature: I
+       opcode: "0010011"
+       funct_3: "111"
+    SLLI:
+       signature: R
+       opcode: "0010011"
+       funct_3: "001"
+       funct_7: "0000000"
+    SRLI:
+       signature: R
+       opcode: "0010011"
+       funct_3: "101"
+       funct_7: "0000000"
+    SRAI:
+       signature: R
+       opcode: "0010011"
+       funct_3: "101"
+       funct_7: "0100000"
+    ADD:
+       signature: R
+       opcode: "0110011"
+       funct_3: "000"
+       funct_7: "0000000"
+    SUB:
+       signature: R
+       opcode: "0110011"
+       funct_3: "000"
+       funct_7: "0100000"
+    SLL:
+       signature: R
+       opcode: "0110011"
+       funct_3: "001"
+       funct_7: "0000000"
+    SLT:
+       signature: R
+       opcode: "0110011"
+       funct_3: "010"
+       funct_7: "0000000"
+    SLTU:
+       signature: R
+       opcode: "0110011"
+       funct_3: "011"
+       funct_7: "0000000"
+    XOR:
+       signature: R
+       opcode: "0110011"
+       funct_3: "100"
+       funct_7: "0000000"
+    SRL:
+       signature: R
+       opcode: "0110011"
+       funct_3: "101"
+       funct_7: "0000000"
+    SRA:
+       signature: R
+       opcode: "0110011"
+       funct_3: "101"
+       funct_7: "0100000"
+    OR:
+       signature: R
+       opcode: "0110011"
+       funct_3: "110"
+       funct_7: "0000000"
+    AND:
+       signature: R
+       opcode: "0110011"
+       funct_3: "111"
+       funct_7: "0000000"
+    FENCE:
+       signature: I
+       opcode: "0001111"
+       funct_3: "000"
+    FENCE_I:
+       signature: I
+       opcode: "0001111"
+       funct_3: "001"
+    ECALL:
+       signature: I
+       opcode: "1110011"
+       funct_3: "000"
+       imm_11_0: "000000000000"
+    EBREAK:
+       signature: I
+       opcode: "1110011"
+       funct_3: "000"
+       imm_11_0: "000000000001"
+    CSRRW:
+       signature: I
+       opcode: "1110011"
+       funct_3: "001"
+    CSRRS:
+       signature: I
+       opcode: "1110011"
+       funct_3: "010"
+    CSRRC:
+       signature: I
+       opcode: "1110011"
+       funct_3: "011"
+    CSRRWI:
+       signature: I
+       opcode: "1110011"
+       funct_3: "101"
+    CSRRSI:
+       signature: I
+       opcode: "1110011"
+       funct_3: "110"
+    CSRRCI:
+       signature: I
+       opcode: "1110011"
+       funct_3: "111"
+  RV32A:
+    LR_W:
+      signature: A
+      opcode: "0101111"
+      funct_3: "010"
+      funct_5: "00010"
+    SC_W:
+      signature: A
+      opcode: "0101111"
+      funct_3: "010"
+      funct_5: "00011"
+    AMOSWAP_W:
+      signature: A
+      opcode: "0101111"
+      funct_3: "010"
+      funct_5: "00001"
+    AMOADD_W:
+      signature: A
+      opcode: "0101111"
+      funct_3: "010"
+      funct_5: "00000"
+    AMOXOR_W:
+      signature: A
+      opcode: "0101111"
+      funct_3: "010"
+      funct_5: "00100"
+    AMOAND_W:
+      signature: A
+      opcode: "0101111"
+      funct_3: "010"
+      funct_5: "01100"
+    AMOOR_W:
+      signature: A
+      opcode: "0101111"
+      funct_3: "010"
+      funct_5: "01000"
+    AMOMIN_W:
+      signature: A
+      opcode: "0101111"
+      funct_3: "010"
+      funct_5: "10000"
+    AMOMAX_W:
+      signature: A
+      opcode: "0101111"
+      funct_3: "010"
+      funct_5: "10100"
+    AMOMINU_W:
+      signature: A
+      opcode: "0101111"
+      funct_3: "010"
+      funct_5: "11000"
+    AMOMAXU_W:
+      signature: A
+      opcode: "0101111"
+      funct_3: "010"
+      funct_5: "11100"
+   

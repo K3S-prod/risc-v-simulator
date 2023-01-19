@@ -13,8 +13,8 @@ int main(int argc, char** argv) {
     }
 
     std::string elfFileName = std::string(argv[1]);
-    sim::Simulator state(elfFileName);
-
+    sim::Simulator sim(elfFileName);
+    sim.runSimulation();
     //state.getMemory().dump();
 
     return 0;

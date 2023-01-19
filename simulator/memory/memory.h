@@ -1,7 +1,7 @@
 #pragma once
 
+#include "simulator/elf_loader/elf_loader.h"
 #include <array>
-#include "elf_loader.h"
 constexpr unsigned DRAM_SIZE = 4096 * 1024;
 
 namespace sim {

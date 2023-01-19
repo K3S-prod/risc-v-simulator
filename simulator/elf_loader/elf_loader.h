@@ -1,7 +1,9 @@
 #pragma once
 
+#include <third_party/ELFIO/elfio/elfio.hpp>
+
+#include <cstdint>
 #include <string>
-#include <elfio/elfio.hpp>
 
 namespace sim {
 
