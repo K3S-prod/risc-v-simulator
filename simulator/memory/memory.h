@@ -1,8 +1,8 @@
 #pragma once
 
+#include "simulator/elf_loader/elf_loader.h"
+#include "simulator/memory/mmu.h"
 #include <array>
-#include "elf_loader.h"
-#include "mmu.h"
 
 namespace sim {
 

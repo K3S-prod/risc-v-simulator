@@ -51,12 +51,12 @@ make
 # Run
 Running tests:
 ```shell
-cd build/bin
-./tests
+cd build
+./bin/tests
 ```
 
 Running simulator:
 ```shell
-cd build/bin
-./simulator <elf_filename>
+cd build
+./bin/simulator <elf_filename>
 ```
