@@ -50,17 +50,24 @@ TEST(MMU, get_physical_address) {
     std::cout << "INFO: MMU generated address: " << std::dec << addr << "(" <<
                                              std::hex << addr << ")" << std::endl;
     std::cout << "INFO: Memory limit: " << std::dec << sim::DRAM_SIZE << std::endl;
-    ASSERT_EQ(addr, 36800);
+    ASSERT_EQ(addr, 0xfc0);
 }
 
-// TEST(MMU, get_physical_addresses_multiple) {
-//     sim::VirtAddr virtAddr = 0x1234567890abcdef;
-//     sim::MMU mmu;
-//     auto addr = mmu.generatePhysAddr(virtAddr);
-//     std::cout << "INFO: MMU generated address: " << std::dec << addr << "(" <<
-//                                              std::hex << addr << ")" << std::endl;
+TEST(MMU, get_physical_addresses_multiple) {
+    sim::VirtAddr virtAddr = 0xDEADBEEF;
+    sim::MMU mmu;
+    auto addr = mmu.generatePhysAddr(virtAddr);
+    std::cout << "INFO: MMU generated address: " << std::dec << addr << "(" <<
+                                             std::hex << addr << ")" << std::endl;
+    ASSERT_EQ(addr,0xEEF);
+
+    virtAddr = 0xEDA65;
+    addr = mmu.generatePhysAddr(virtAddr);
+    std::cout << "INFO: MMU generated address: " << std::dec << addr << "(" <<
+                                             std::hex << addr << ")" << std::endl;
+    ASSERT_EQ(addr, 0x1a65);
                                              
-// }
+}
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
