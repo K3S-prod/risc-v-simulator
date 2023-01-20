@@ -21,11 +21,15 @@ char* Memory::fetchInstruction(VirtAddr virtAddr) {
 }
 
 void Memory::store(uint64_t value, VirtAddr virtAddr) {
-    PhysAddr physAddr = mmu_.generatePhysAddr(virtAddr);
+    // PhysAddr physAddr = mmu_.generatePhysAddr(virtAddr);
 }
 
 uint64_t Memory::load(VirtAddr virtAddr) {
     throw std::runtime_error("ERROR: MMU not implemented");
+}
+
+char* Memory::getPointerPhysAddr(PhysAddr aligned_address) {
+    return &(memory_[aligned_address]);
 }
 
 void Memory::dump() {
