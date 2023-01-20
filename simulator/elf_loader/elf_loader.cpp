@@ -1,6 +1,5 @@
 
 #include "simulator/elf_loader/elf_loader.h"
-#include "simulator/memory/memory.h"
 #include "common/macro.h"
 
 #include <cstdlib>
@@ -8,35 +7,33 @@
 
 namespace sim {
 
-ElfLoader::ElfLoader(std::string& elfFileName) {
-    data_ = (char*) calloc(DRAM_SIZE, sizeof(char));
-    assert(data_ != NULL);
-    fileName_ = elfFileName;
-    int ret = loadFromFile(elfFileName);
+ElfLoader::ElfLoader(const std::string& elfFileName) {
+    file_name_ = elfFileName;
+    int ret = LoadFromFile();
     if (ret != 0) {
         throw std::runtime_error("Failed to construct elf loader");
     }
 }
 
-int ElfLoader::loadFromFile(std::string& elfFileName) {
-    if (!elfFile_.load(elfFileName)) {
-        std::cerr << "ERROR: could not load file " << elfFileName << std::endl;
+int ElfLoader::LoadFromFile() {
+    if (!elf_file_.load(file_name_)) {
+        std::cerr << "ERROR: could not load file " << file_name_ << std::endl;
         return EXIT_FAILURE;
     }
-    std::cout << "INFO: Successfully loaded " << elfFileName << std::endl;
+    std::cout << "INFO: Successfully loaded " << file_name_ << std::endl;
     return 0;
 }
 
-size_t ElfLoader::getEntryPoint()
+VAddr ElfLoader::GetMainEntryPoint()
 {
     const ELFIO::section *symt_sect = nullptr;
-    for (const auto& section: elfFile_.sections) {
+    for (const auto& section: elf_file_.sections) {
         if (section->get_type() == ELFIO::SHT_SYMTAB) {
             symt_sect = section.get();
             break;
         }
     }
-    ELFIO::const_symbol_section_accessor ssa(elfFile_, symt_sect);
+    ELFIO::const_symbol_section_accessor ssa(elf_file_, symt_sect);
     
     ELFIO::Elf64_Addr va_addr;
     ELFIO::Elf_Xword size;
@@ -47,57 +44,7 @@ size_t ElfLoader::getEntryPoint()
     bool res = ssa.get_symbol("main", va_addr, size, bind, type, section_index, other);
     ASSERT(res);
 
-    return static_cast<size_t>(va_addr);
-}
-
-unsigned ElfLoader::calcEntrySegNum(size_t entryPoint) {
-    ELFIO::Elf_Half segNum = 0;
-    for (const auto& segment: elfFile_.segments) {
-        auto segVAddr = segment->get_virtual_address();
-        auto segNum = segment->get_index();
-        if (entryPoint > segVAddr && entryPoint < segVAddr + segment->get_memory_size()) {
-            return segNum;
-        }
-    }
-    return segNum;
-}
-
-size_t ElfLoader::calcEntrySegOffset(size_t entryPoint, unsigned segNum) {
-    auto segment = elfFile_.segments[segNum];
-    return entryPoint - segment->get_offset();
-}
-
-// TODO(dkofanov): Remove this when virtual memory will be implemented: 
-size_t ElfLoader::recalculateEntryPoint(size_t entryPoint) {
-    auto entrySegNum = calcEntrySegNum(entryPoint);
-    std::cout << "INFO: entry point in segment number: " << entrySegNum << std::endl;
-    
-    auto entrySegOffset = calcEntrySegOffset(entryPoint, entrySegNum);
-    std::cout << "INFO: entry offset: " << std::hex << entrySegOffset << std::endl;
-
-    for (const auto& segment: elfFile_.segments) {
-        if (segment->get_index() == entrySegNum) {
-            size_t recalculatedEntryPoint = entryPoint - segment->get_virtual_address();
-            std::cout << "INFO: recalculated entrypoint: " << std::hex << recalculatedEntryPoint << std::endl;
-            return recalculatedEntryPoint;
-        }
-    }
-    UNREACHABLE();
-}
-
-void ElfLoader::loadData() {
-    size_t size = 0;
-    for (const auto& segment: elfFile_.segments) {
-        if (segment->get_type() == ELFIO::PT_LOAD) {
-            auto segAddr = segment->get_virtual_address();
-            auto segSize = segment->get_memory_size();
-            auto segData = segment->get_data();
-            std::cout << "INFO: loading segment at address " << segAddr << ", size: " << segSize << std::endl;
-            memcpy(data_ + size, segData, segSize);
-            size += static_cast<size_t>(segSize);
-        }
-    }
-    dataSize_ = size;
+    return va_addr;
 }
 
 } // namespace sim
