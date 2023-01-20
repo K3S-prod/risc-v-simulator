@@ -1,5 +1,4 @@
 
-
 int fibbonaci(int num) {
     if (num == 1) {
         return 1;
@@ -9,7 +8,6 @@ int fibbonaci(int num) {
         return fibbonaci(num - 1) + fibbonaci(num - 2);
     }
 }
-
 
 int main() {
     int result = 0;

@@ -16,15 +16,16 @@ namespace sim {
 #define A() decoder.a
     
 #define DISPATCH() \
-{                                                                       \
-    size_t dispatch_idx = static_cast<size_t>(decoder.Decode(GetPc())); \
+{                                                                                       \
+    VAddr va = GetPc();                                                                 \
+    auto *page = mmu_->GetPage(va);                                                      \
+    const auto *native_ptr = static_cast<const uint8_t *>(page->GetNativePtr(va.offs));  \
+    size_t dispatch_idx = static_cast<size_t>(decoder.Decode(native_ptr));  \
     goto *DISPATCH_TABLE[dispatch_idx];                                 \
 }
 
-int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
+int Interpreter::Invoke()
 {
-    // TODO(dkofanov): This should be changed to `SetPc(entrypoint)` when MMU is implemented:
-    SetPc(code + recalc_entryp_offset);
     Decoder decoder;
 
 #include <simulator/interpreter/generated/dispatch_table.inl>

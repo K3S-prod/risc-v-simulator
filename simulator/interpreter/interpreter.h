@@ -4,15 +4,13 @@
 #include <cstdint>
 #include <cstddef>
 #include <array>
+#include "simulator/memory/mmu.h"
 
 namespace sim {
 
 class Interpreter {
 public:
-
-    // TODO(dkofanov): change this to uint32_t when virtual memory will be implemented:
-    // Currently, this should be able to store a native pointer (AMD64):
-    using reg_t = uint64_t;
+    using reg_t = uint32_t;
 
     struct State {
         std::array<reg_t, 31> x_regs {};
@@ -20,6 +18,8 @@ public:
     };
 
 public:
+    Interpreter(MMU *mmu) : mmu_(mmu) {}
+
     reg_t GetReg(uint8_t id)
     {
         if (id == 0) {
@@ -33,23 +33,24 @@ public:
             state_.x_regs[id - 1U] = v;
         }
     }
-    const uint8_t *GetPc()
+    reg_t GetPc()
     {
-        return reinterpret_cast<const uint8_t *>(state_.pc);
+        return state_.pc;
     }
-    void SetPc(const uint8_t *v)
+    void SetPc(reg_t v)
     {
-        state_.pc = reinterpret_cast<reg_t>(v);
+        state_.pc = v;
     }
     void AdvancePc(reg_t v)
     {
         state_.pc += v;
     }
 
-    int Invoke(const uint8_t *code, size_t entryp);
+    int Invoke();
 
 private:
     State state_;
+    MMU *mmu_;
 };
 
 

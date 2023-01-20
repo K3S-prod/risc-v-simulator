@@ -7,15 +7,11 @@
 
 namespace sim {
 
-Memory::Memory(ElfLoader& loader) {
-    memory_ = (char*) calloc(DRAM_SIZE, sizeof(char));
-    loader.loadData();
-    auto data = loader.getData();
-    memcpy(memory_, data, loader.getDataSize());
-    entry_ = loader.getRecalcEntry();
-    size_ = loader.getDataSize();
+Memory::Memory() : memory_(DRAM_SIZE / PAGE_SIZE)
+{
 }
 
+/*
 char* Memory::fetchInstruction(VirtAddr virtAddr) {
     throw std::runtime_error("ERROR: MMU not implemented");
 }
@@ -39,5 +35,5 @@ void Memory::dump() {
     }
     std::cout << "INFO: Done." << std::endl;
 }
-
+*/
 } // namespace sim

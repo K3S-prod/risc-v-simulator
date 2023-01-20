@@ -4,9 +4,44 @@
 
 namespace sim {
 
-MMU::MMU() {
-    for (uint64_t vpnNum = 0; vpnNum < VPNS_NUM; ++vpnNum) {
-        pageTable_.emplace(vpnNum, PTE(0, 0, vpnNum));
+MMU::MMU(const std::string& elfFileName)
+{
+    ElfLoader loader(elfFileName);
+
+    LoadElfData(loader);
+    entry_ = loader.GetMainEntryPoint();
+}
+
+void MMU::LoadElfData(const ElfLoader &loader)
+{
+    const auto &elf_file = loader.GetElfFile();
+
+    size_t size = 0;
+    for (const auto& segment: elf_file.segments) {
+        if (segment->get_type() == ELFIO::PT_LOAD) {
+            auto seg_addr = segment->get_virtual_address();
+            auto seg_size = segment->get_memory_size();
+            auto seg_data = segment->get_data();
+            VAddr va(seg_addr);
+            LOG_DEBUG(MMU, "loading segment at address " << seg_addr << ", size: " << seg_size << std::endl);
+            auto page = GetOrAllocPage(va);
+            uint32_t remainder = 0;
+            if ((va.offs + seg_size) > PAGE_SIZE) {
+                remainder = (va.offs + seg_size) - PAGE_SIZE;
+            }
+            auto real_write_size = seg_size - remainder;
+            page->Write(va.offs, seg_data, real_write_size);
+            if (remainder != 0) {
+                auto seg_addr_2 = seg_addr + real_write_size;
+                auto seg_data_2 = seg_data + real_write_size;
+                VAddr va_2(seg_addr_2);
+                auto page_2 = GetOrAllocPage(va_2);
+                ASSERT(remainder < PAGE_SIZE);
+                ASSERT(va_2.offs == 0);
+                page->Write(va_2.offs, seg_data_2, remainder);
+            }
+            size += static_cast<size_t>(seg_size);
+        }
     }
 }
 
@@ -30,7 +65,7 @@ MMU::MMU() {
 //     pageTable_.erase(leastUsedVPN);
 //     pageTable_.emplace(leastUsedVPN);
 // }
-
+/*
 uint64_t MMU::getPPN(uint64_t VPN) {
     auto hit = pageTable_.find(VPN);
 
@@ -62,5 +97,5 @@ PhysAddr MMU::generatePhysAddr(VirtAddr virtAddr) {
     PhysAddr PPN = getPPN(VPN);
     return static_cast<PhysAddr>((  PPN << VPN_OFFSET) | PPO);
 }
-
+*/
 } // namespace sim
