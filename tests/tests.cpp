@@ -66,7 +66,28 @@ TEST(MMU, get_physical_addresses_multiple) {
     std::cout << "INFO: MMU generated address: " << std::dec << addr << "(" <<
                                              std::hex << addr << ")" << std::endl;
     ASSERT_EQ(addr, 0x1a65);
-                                             
+}
+
+TEST(Cache, load_in_cache) {
+    std::string elfFileName = "bin/elfs/fibbonacci_riscv";
+
+    sim::Simulator simulator(elfFileName);
+
+    uint32_t start_addr = 0x300;
+    simulator.loadData(start_addr);
+    // simulator.dumpCache();
+
+    // Overflow L1 and L2
+    simulator.loadData(start_addr + sim::SIZE_DATA_BLOCK * 1);
+    simulator.loadData(start_addr + sim::SIZE_DATA_BLOCK * 2);
+    simulator.loadData(start_addr + sim::SIZE_DATA_BLOCK * 3);
+    simulator.loadData(start_addr + sim::SIZE_DATA_BLOCK * 4);
+
+    sim::Cache* c = simulator.getCache();
+    ASSERT_EQ(c->getCacheLine(1, 0)->address, c->getCacheLine(2, 0)->address);
+    ASSERT_EQ(c->getCacheLine(2, 0)->address, start_addr + sim::SIZE_DATA_BLOCK * 4);
+
+    // simulator.dumpCache();
 }
 
 int main(int argc, char** argv) {

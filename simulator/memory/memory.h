@@ -8,13 +8,13 @@ namespace sim {
 
 // 4096 * 1024 = 4194304 = 2^22
 constexpr unsigned DRAM_SIZE = 4096 * 1024;
+using PhysAddr = uint32_t;
 
 class Memory {
     char* memory_;
     size_t size_ = 0x0;
     size_t entry_ = 0x0;
 
-    MMU mmu_;
 public:
     Memory(ElfLoader& loader);
     Memory() = default;
@@ -42,6 +42,8 @@ public:
     ~Memory() {
         free(memory_);
     }
+
+    char* getPointerPhysAddr(PhysAddr aligned_address);
 };
 
 } // namespace sim
