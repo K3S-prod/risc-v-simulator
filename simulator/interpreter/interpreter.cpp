@@ -21,6 +21,45 @@ namespace sim {
     goto *DISPATCH_TABLE[dispatch_idx];                                 \
 }
 
+#define SIGNED(value) static_cast<int32_t>(value)
+#define UNSIGNED(value) static_cast<uint32_t>(value)
+#define GETPC() reinterpret_cast<uint64_t>(GetPc())
+#define SETPC(value) SetPc(reinterpret_cast<uint8_t*>(value))
+
+#define GET_J_IMM(imm) \
+{                                                                       \
+    for (int i = 20; i < 32; ++i) {                                     \
+        imm |= J().imm_20 << i;                                         \
+    }                                                                   \
+    imm |= J().imm_19_12 << 12 | J().imm_11 << 11 | J().imm_10_1 << 1;  \
+}
+
+#define GET_B_IMM(imm) \
+{                                                                       \
+    for (int i = 12; i < 32; ++i) {                                     \
+        imm |= B().imm_12 << i;                                         \
+    }                                                                   \
+    imm |= B().imm_4_1 << 1 | B().imm_10_5 << 5 | B().imm_11 << 11;     \
+}
+
+#define GET_I_IMM(imm) \
+{                                                                       \
+    imm = I().imm_11_0;                                                 \
+    uint32_t sign_bit = imm >> 11;                                      \
+    for (int i = 12; i < 32; ++i) {                                     \
+        imm |= sign_bit << i;                                           \
+    }                                                                   \
+}
+
+#define GET_S_IMM(imm) \
+{                                                                       \
+    imm = S().imm_4_0 | S().imm_11_5 << 5;                              \
+    uint32_t sign_bit = imm >> 11;                                      \
+    for (int i = 12; i < 32; ++i) {                                     \
+        imm |= sign_bit << i;                                           \
+    }                                                                   \
+}
+
 int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
 {
     // TODO(dkofanov): This should be changed to `SetPc(entrypoint)` when MMU is implemented:
@@ -50,7 +89,7 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
 
         auto rd = U().rd;
         auto imm = U().imm_31_12;
-        auto pc = reinterpret_cast<uint64_t>(GetPc());
+        auto pc = GETPC();
         
         imm <<= 12;
         SetReg(rd, imm + pc);
@@ -63,17 +102,14 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
         LOG_DEBUG(INTERPRETER, J().Dump("JAL"));
 
         auto rd = J().rd;
-        uint32_t offset = 0;
-        for (int i = 20; i < 32; ++i) {
-            offset |= J().imm_20 << i;
-        }
-        offset |= J().imm_19_12 << 12 | J().imm_11 << 11 | J().imm_10_1 << 1;
-        auto pc = reinterpret_cast<uint64_t>(GetPc());
+        uint32_t imm = 0;
+        GET_J_IMM(imm);
+        auto pc = GETPC();
 
         if (rd != 0) {
             SetReg(rd, pc + 4U);
         }
-        SetPc(reinterpret_cast<uint8_t*>(pc + offset));
+        SETPC(pc + SIGNED(imm));
 
         //AdvancePc(sizeof(Decoder::J));
         DISPATCH();
@@ -84,21 +120,18 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
 
         auto rd = I().rd;
         auto rs1 = I().rs1;
-        uint32_t offset = I().imm_11_0;
-        uint32_t sign_bit = offset >> 11;
-        for (int i = 12; i < 32; ++i) {
-            offset |= sign_bit << i;
-        }
-        auto pc = reinterpret_cast<uint64_t>(GetPc());
+        auto imm = 0;
+        GET_I_IMM(imm);
+        auto pc = GETPC();
 
         if (rd != 0) {
             SetReg(rd, pc + 4U);
         }
-        SetPc(reinterpret_cast<uint8_t*>(rs1 + offset));
+        SETPC(SIGNED(GetReg(rs1)) + SIGNED(imm));
 
         /* TODO: check if we need this
-        auto new_pc = reinterpret_cast<uint64_t>(GetPc());
-        SetPc(reinterpret_cast<uint8_t*>(new_pc & 0xFFFFFFFE));
+        auto new_pc = GETPC();
+        SETPC(new_pc & 0xFFFFFFFE);
         */
 
         //AdvancePc(sizeof(Decoder::I));
@@ -110,15 +143,12 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
 
         auto rs1 = B().rs1;
         auto rs2 = B().rs2;
-        auto pc = reinterpret_cast<uint64_t>(GetPc());
+        auto pc = GETPC();
         uint32_t imm = 0;
-        for (int i = 12; i < 32; ++i) {
-            imm |= B().imm_12 << i;
-        }
-        imm |= B().imm_4_1 << 1 | B().imm_10_5 << 5 | B().imm_11 << 11;
+        GET_B_IMM(imm);
 
         if (rs1 == rs2) {
-            SetPc(reinterpret_cast<uint8_t*>(pc + imm));
+            SETPC(pc + SIGNED(imm));
         }
         
         //AdvancePc(sizeof(Decoder::B));
@@ -130,15 +160,12 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
 
         auto rs1 = B().rs1;
         auto rs2 = B().rs2;
-        auto pc = reinterpret_cast<uint64_t>(GetPc());
+        auto pc = GETPC();
         uint32_t imm = 0;
-        for (int i = 12; i < 32; ++i) {
-            imm |= B().imm_12 << i;
-        }
-        imm |= B().imm_4_1 << 1 | B().imm_10_5 << 5 | B().imm_11 << 11;
+        GET_B_IMM(imm);
 
         if (rs1 != rs2) {
-            SetPc(reinterpret_cast<uint8_t*>(pc + imm));
+            SETPC(pc + SIGNED(imm));
         }
 
         AdvancePc(sizeof(Decoder::B));
@@ -150,15 +177,12 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
 
         auto rs1 = B().rs1;
         auto rs2 = B().rs2;
-        auto pc = reinterpret_cast<uint64_t>(GetPc());
+        auto pc = GETPC();
         uint32_t imm = 0;
-        for (int i = 12; i < 32; ++i) {
-            imm |= B().imm_12 << i;
-        }
-        imm |= B().imm_4_1 << 1 | B().imm_10_5 << 5 | B().imm_11 << 11;
+        GET_B_IMM(imm);
 
         if (rs1 < rs2) {
-            SetPc(reinterpret_cast<uint8_t*>(pc + imm));
+            SETPC(pc + SIGNED(imm));
         }
 
         AdvancePc(sizeof(Decoder::B));
@@ -170,15 +194,12 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
 
         auto rs1 = B().rs1;
         auto rs2 = B().rs2;
-        auto pc = reinterpret_cast<uint64_t>(GetPc());
+        auto pc = GETPC();
         uint32_t imm = 0;
-        for (int i = 12; i < 32; ++i) {
-            imm |= B().imm_12 << i;
-        }
-        imm |= B().imm_4_1 << 1 | B().imm_10_5 << 5 | B().imm_11 << 11;
+        GET_B_IMM(imm);
 
         if (rs1 >= rs2) {
-            SetPc(reinterpret_cast<uint8_t*>(pc + imm));
+            SETPC(pc + imm);
         }
 
         AdvancePc(sizeof(Decoder::B));
@@ -191,15 +212,12 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
 
         auto rs1 = B().rs1;
         auto rs2 = B().rs2;
-        auto pc = reinterpret_cast<uint64_t>(GetPc());
+        auto pc = GETPC();
         uint32_t imm = 0;
-        for (int i = 12; i < 32; ++i) {
-            imm |= B().imm_12 << i;
-        }
-        imm |= B().imm_4_1 << 1 | B().imm_10_5 << 5 | B().imm_11 << 11;
+        GET_B_IMM(imm);
 
         if (rs1 < rs2) {
-            SetPc(reinterpret_cast<uint8_t*>(pc + imm));
+            SETPC(pc + imm);
         }
 
         AdvancePc(sizeof(Decoder::B));
@@ -212,15 +230,12 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
 
         auto rs1 = B().rs1;
         auto rs2 = B().rs2;
-        auto pc = reinterpret_cast<uint64_t>(GetPc());
+        auto pc = GETPC();
         uint32_t imm = 0;
-        for (int i = 12; i < 32; ++i) {
-            imm |= B().imm_12 << i;
-        }
-        imm |= B().imm_4_1 << 1 | B().imm_10_5 << 5 | B().imm_11 << 11;
-
+        GET_B_IMM(imm);
+        
         if (rs1 >= rs2) {
-            SetPc(reinterpret_cast<uint8_t*>(pc + imm));
+            SETPC(pc + imm);
         }
 
         AdvancePc(sizeof(Decoder::B));
@@ -230,11 +245,8 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
     I_LB: {
         LOG_DEBUG(INTERPRETER, I().Dump("LB"));
 
-        uint32_t offset = I().imm_11_0;
-        uint32_t sign_bit = offset >> 11;
-        for (int i = 12; i < 32; ++i) {
-            offset |= sign_bit << i;
-        }
+        auto imm = 0;
+        GET_I_IMM(imm);
         throw std::runtime_error("Not implemented");
 
         AdvancePc(sizeof(Decoder::I));
@@ -244,11 +256,8 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
     I_LH: {
         LOG_DEBUG(INTERPRETER, I().Dump("LH"));
 
-        uint32_t offset = I().imm_11_0;
-        uint32_t sign_bit = offset >> 11;
-        for (int i = 12; i < 32; ++i) {
-            offset |= sign_bit << i;
-        }
+        auto imm = 0;
+        GET_I_IMM(imm);
         throw std::runtime_error("Not implemented");
 
         AdvancePc(sizeof(Decoder::I));
@@ -258,11 +267,8 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
     I_LW: {
         LOG_DEBUG(INTERPRETER, I().Dump("LW"));
 
-        uint32_t offset = I().imm_11_0;
-        uint32_t sign_bit = offset >> 11;
-        for (int i = 12; i < 32; ++i) {
-            offset |= sign_bit << i;
-        }
+        auto imm = 0;
+        GET_I_IMM(imm);
         throw std::runtime_error("Not implemented");
 
         AdvancePc(sizeof(Decoder::I));
@@ -272,11 +278,8 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
     I_LBU: {
         LOG_DEBUG(INTERPRETER, I().Dump("LBU"));
 
-        uint32_t offset = I().imm_11_0;
-        uint32_t sign_bit = offset >> 11;
-        for (int i = 12; i < 32; ++i) {
-            offset |= sign_bit << i;
-        }
+        auto imm = 0;
+        GET_I_IMM(imm);
         throw std::runtime_error("Not implemented");
 
         AdvancePc(sizeof(Decoder::I));
@@ -286,11 +289,8 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
     I_LHU: {
         LOG_DEBUG(INTERPRETER, I().Dump("LHU"));
 
-        uint32_t offset = I().imm_11_0;
-        uint32_t sign_bit = offset >> 11;
-        for (int i = 12; i < 32; ++i) {
-            offset |= sign_bit << i;
-        }
+        auto imm = 0;
+        GET_I_IMM(imm);
         throw std::runtime_error("Not implemented");
 
         AdvancePc(sizeof(Decoder::I));
@@ -300,11 +300,8 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
     S_SB: {
         LOG_DEBUG(INTERPRETER, S().Dump("SB"));
 
-        uint32_t imm = S().imm_4_0 | S().imm_11_5 << 5;
-        uint32_t sign_bit = imm >> 11;
-        for (int i = 12; i < 32; ++i) {
-            imm |= sign_bit << i;
-        }
+        uint32_t imm = 0;
+        GET_S_IMM(imm);
         throw std::runtime_error("Not implemented");
 
         AdvancePc(sizeof(Decoder::S));
@@ -314,11 +311,8 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
     S_SH: {
         LOG_DEBUG(INTERPRETER, S().Dump("SH"));
 
-        uint32_t imm = S().imm_4_0 | S().imm_11_5 << 5;
-        uint32_t sign_bit = imm >> 11;
-        for (int i = 12; i < 32; ++i) {
-            imm |= sign_bit << i;
-        }
+        uint32_t imm = 0;
+        GET_S_IMM(imm);
         throw std::runtime_error("Not implemented");
 
         AdvancePc(sizeof(Decoder::S));
@@ -328,11 +322,8 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
     S_SW: {
         LOG_DEBUG(INTERPRETER, S().Dump("SW"));
 
-        uint32_t imm = S().imm_4_0 | S().imm_11_5 << 5;
-        uint32_t sign_bit = imm >> 11;
-        for (int i = 12; i < 32; ++i) {
-            imm |= sign_bit << i;
-        }
+        uint32_t imm = 0;
+        GET_S_IMM(imm);
         throw std::runtime_error("Not implemented");
 
         AdvancePc(sizeof(Decoder::S));
@@ -344,14 +335,11 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
 
         auto rs1 = I().rs1;
         auto rd = I().rd;
-        auto imm = I().imm_11_0;
-        uint32_t sign_bit = imm >> 11;
-        for (int i = 12; i < 32; ++i) {
-            imm |= sign_bit << i;
-        }
+        auto imm = 0;
+        GET_I_IMM(imm);
         
         if (rd != 0) {
-            SetReg(rd, GetReg(rs1) + imm);
+            SetReg(rd, GetReg(rs1) + SIGNED(imm));
         }
 
         AdvancePc(sizeof(Decoder::I));
@@ -361,7 +349,17 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
     I_SLTI: {
         LOG_DEBUG(INTERPRETER, I().Dump("SLTI"));
 
-        throw std::runtime_error("Not implemented");
+        auto rs1 = I().rs1;
+        auto rd = I().rd;
+        auto imm = 0;
+        GET_I_IMM(imm);
+
+        if (SIGNED(rs1) < SIGNED(imm)) {
+            SetReg(rd, 1U);
+        } else {
+            SetReg(rd, 0U);
+
+        }
 
         AdvancePc(sizeof(Decoder::I));
         DISPATCH();
@@ -370,7 +368,17 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
     I_SLTIU: {
         LOG_DEBUG(INTERPRETER, I().Dump("SLTIU"));
 
-        throw std::runtime_error("Not implemented");
+        auto rs1 = I().rs1;
+        auto rd = I().rd;
+        auto imm = 0;
+        GET_I_IMM(imm);
+
+        if (rs1 < imm) {
+            SetReg(rd, 1U);
+        } else {
+            SetReg(rd, 0U);
+
+        }
 
         AdvancePc(sizeof(Decoder::I));
         DISPATCH();
@@ -381,14 +389,11 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
 
         auto rs1 = I().rs1;
         auto rd = I().rd;
-        auto imm = I().imm_11_0;
-        uint32_t sign_bit = imm >> 11;
-        for (int i = 12; i < 32; ++i) {
-            imm |= sign_bit << i;
-        }
+        auto imm = 0;
+        GET_I_IMM(imm);
         
         if (rd != 0) {
-            SetReg(rd, GetReg(rs1) ^ imm);
+            SetReg(rd, SIGNED(GetReg(rs1)) ^ SIGNED(imm));
         }
 
         AdvancePc(sizeof(Decoder::I));
@@ -400,14 +405,11 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
 
         auto rs1 = I().rs1;
         auto rd = I().rd;
-        auto imm = I().imm_11_0;
-        uint32_t sign_bit = imm >> 11;
-        for (int i = 12; i < 32; ++i) {
-            imm |= sign_bit << i;
-        }
+        auto imm = 0;
+        GET_I_IMM(imm);
         
         if (rd != 0) {
-            SetReg(rd, GetReg(rs1) | imm);
+            SetReg(rd, SIGNED(GetReg(rs1)) | SIGNED(imm));
         }
 
         AdvancePc(sizeof(Decoder::I));
@@ -419,14 +421,11 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
 
         auto rs1 = I().rs1;
         auto rd = I().rd;
-        auto imm = I().imm_11_0;
-        uint32_t sign_bit = imm >> 11;
-        for (int i = 12; i < 32; ++i) {
-            imm |= sign_bit << i;
-        }
+        auto imm = 0;
+        GET_I_IMM(imm);
         
         if (rd != 0) {
-            SetReg(rd, GetReg(rs1) & imm);
+            SetReg(rd, SIGNED(GetReg(rs1)) & SIGNED(imm));
         }
 
         AdvancePc(sizeof(Decoder::I));
@@ -435,18 +434,41 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
     
     R_SLLI: {
         LOG_DEBUG(INTERPRETER, R().Dump("SLLI"));
+
+        auto rs1 = R().rs1;
+        auto rd = R().rd;
+        auto shamt = R().rs2;
+
+        SetReg(rd, GetReg(rs1) << shamt);
+
         AdvancePc(sizeof(Decoder::R));
         DISPATCH();
     }
     
     R_SRLI: {
         LOG_DEBUG(INTERPRETER, R().Dump("SRLI"));
+
+        auto rs1 = R().rs1;
+        auto rd = R().rd;
+        auto shamt = R().rs2;
+
+        SetReg(rd, GetReg(rs1) >> shamt);
+
         AdvancePc(sizeof(Decoder::R));
         DISPATCH();
     }
     
     R_SRAI: {
         LOG_DEBUG(INTERPRETER, R().Dump("SRAI"));
+
+        auto rs1 = R().rs1;
+        auto rd = R().rd;
+        auto shamt = R().rs2;
+
+        auto rs1_value = GetReg(rs1);
+        auto ans = (rs1_value >> shamt) | (rs1_value & (1 << 31));
+        SetReg(rd, ans);
+
         AdvancePc(sizeof(Decoder::R));
         DISPATCH();
     }
@@ -459,7 +481,7 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
         auto rs2 = R().rs2;
 
         if (rd != 0) {
-            auto value = GetReg(rs1) + GetReg(rs2);
+            auto value = SIGNED(GetReg(rs1)) + SIGNED(GetReg(rs2));
             SetReg(rd, value);
         }
 
@@ -475,7 +497,7 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
         auto rs2 = R().rs2;
 
         if (rd != 0) {
-            auto value = GetReg(rs1) - GetReg(rs2);
+            auto value = SIGNED(GetReg(rs1)) - SIGNED(GetReg(rs2));
             SetReg(rd, value);
         }
 
@@ -484,7 +506,6 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
     }
     
     R_SLL: {
-        // TODO: FIXME this one should operate with unsigned rs1 and rs2 values
         LOG_DEBUG(INTERPRETER, R().Dump("SLL"));
         
         auto rd = R().rd;
@@ -502,12 +523,38 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
     
     R_SLT: {
         LOG_DEBUG(INTERPRETER, R().Dump("SLT"));
+
+        auto rd = R().rd;
+        auto rs1 = R().rs1;
+        auto rs2 = R().rs2;
+
+        if (rd != 0) {
+            if (SIGNED(GetReg(rs1)) < SIGNED(GetReg(rs2))) {
+                SetReg(rd, 1U);
+            } else {
+                SetReg(rd, 0U);
+            }
+        }
+
         AdvancePc(sizeof(Decoder::R));
         DISPATCH();
     }
     
     R_SLTU: {
         LOG_DEBUG(INTERPRETER, R().Dump("SLTU"));
+
+        auto rd = R().rd;
+        auto rs1 = R().rs1;
+        auto rs2 = R().rs2;
+
+        if (rd != 0) {
+            if (GetReg(rs1) < GetReg(rs2)) {
+                SetReg(rd, 1U);
+            } else {
+                SetReg(rd, 0U);
+            }
+        }
+
         AdvancePc(sizeof(Decoder::R));
         DISPATCH();
     }
@@ -529,7 +576,6 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
     }
     
     R_SRL: {
-        // TODO: FIXME this one should operate with unsigned rs1 and rs2 values
         LOG_DEBUG(INTERPRETER, R().Dump("SRL"));
 
         auto rd = R().rd;
@@ -547,6 +593,16 @@ int Interpreter::Invoke(const uint8_t *code, size_t recalc_entryp_offset)
     
     R_SRA: {
         LOG_DEBUG(INTERPRETER, R().Dump("SRA"));
+
+        auto rd = R().rd;
+        auto rs1 = R().rs1;
+        auto rs2 = R().rs2;
+
+        if (rd != 0) {
+            auto value = SIGNED(GetReg(rs1)) >> SIGNED(GetReg(rs2));
+            SetReg(rd, value);
+        }
+
         AdvancePc(sizeof(Decoder::R));
         DISPATCH();
     }
