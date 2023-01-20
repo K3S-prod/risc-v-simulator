@@ -27,9 +27,10 @@ TEST(Memory, memory_init) {
 }
 */
 TEST(Sim, integration) {
-    GTEST_SKIP();
+    //GTEST_SKIP();
     std::string elfFileName = "bin/elfs/fibbonacci_riscv";
     sim::Simulator state(elfFileName);
+    state.runSimulation();
 }
 /*
 TEST(MMU, get_physical_address) {

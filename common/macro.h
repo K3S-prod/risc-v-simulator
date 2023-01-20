@@ -21,6 +21,8 @@
     std::cout << "[" << #component << "] " << msg << std::endl; \
 }
 
+#ifndef WIN32
+
 #define LOG_FATAL(component, msg) \
 {                                                                       \
     std::cerr << "[" << #component << "] FATAL: " << msg << std::endl;  \
@@ -34,4 +36,18 @@
     __builtin_unreachable();                                            \
 }
 
+#else // WIN32
+
+#define LOG_FATAL(component, msg) \
+{                                                                       \
+    std::cerr << "[" << #component << "] FATAL: " << msg << std::endl;  \
+    exit(EXIT_FAILURE);                                                 \
+}
+
+#define UNREACHABLE() \
+{                                                                       \
+    exit(EXIT_FAILURE);                                                 \
+}
+
+#endif // WIN32
 #endif  // COMMON_MACRO_H

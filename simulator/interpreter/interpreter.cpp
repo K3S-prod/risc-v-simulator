@@ -18,10 +18,25 @@ namespace sim {
 #define DISPATCH() \
 {                                                                                       \
     VAddr va = GetPc();                                                                 \
-    auto *page = mmu_->GetPage(va);                                                      \
-    const auto *native_ptr = static_cast<const uint8_t *>(page->GetNativePtr(va.offs));  \
-    size_t dispatch_idx = static_cast<size_t>(decoder.Decode(native_ptr));  \
-    goto *DISPATCH_TABLE[dispatch_idx];                                 \
+    auto *page = mmu_->GetPage(va);                                                     \
+    const auto *native_ptr = static_cast<const uint8_t *>(page->GetNativePtr(va.offs)); \
+    size_t dispatch_idx = static_cast<size_t>(decoder.Decode(native_ptr));              \
+    goto *DISPATCH_TABLE[dispatch_idx];                                                 \
+}
+
+#define LOAD_FROM_MEMORY(addr) \
+{                                                                                       \
+    VAddr va = addr;                                                                    \
+    auto *page = mmu_->GetPage(va);                                                     \
+    loaded = *static_cast<const uint32_t *>(page->GetNativePtr(va.offs));               \
+}
+
+#define STORE_TO_MEMORY(addr, value) \
+{                                                                                       \
+    VAddr va = addr;                                                                    \
+    auto *page = mmu_->GetPage(va);                                                     \
+    auto native_addr = static_cast<uint32_t *>(page->GetNativePtr(va.offs));            \
+    *native_addr = value;                                                               \
 }
 
 #define SIGNED(value) static_cast<int32_t>(value)
@@ -268,9 +283,14 @@ int Interpreter::Invoke()
     I_LW: {
         LOG_DEBUG(INTERPRETER, I().Dump("LW"));
 
+        auto rs1 = I().rs1;
+        auto rd = I().rd;
         auto imm = 0;
         GET_I_IMM(imm);
-        throw std::runtime_error("Not implemented");
+
+        int loaded = 0;
+        LOAD_FROM_MEMORY(GetReg(rs1) + imm);
+        SetReg(rd, loaded);
 
         AdvancePc(sizeof(Decoder::I));
         DISPATCH();
@@ -323,9 +343,13 @@ int Interpreter::Invoke()
     S_SW: {
         LOG_DEBUG(INTERPRETER, S().Dump("SW"));
 
+        auto rs1 = S().rs1;
+        auto rs2 = S().rs2;
         uint32_t imm = 0;
         GET_S_IMM(imm);
-        throw std::runtime_error("Not implemented");
+
+        auto addr = SIGNED(rs1) + imm;
+        STORE_TO_MEMORY(addr, rs2);
 
         AdvancePc(sizeof(Decoder::S));
         DISPATCH();
