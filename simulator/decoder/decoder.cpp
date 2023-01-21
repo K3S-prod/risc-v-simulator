@@ -1,4 +1,5 @@
 #include "decoder.h"
+#include "simulator/interpreter/register.h"
 
 #include <cstdint>
 #include <sstream>
@@ -10,6 +11,9 @@ std::string Decoder::R::Dump(const std::string &prefix)
     std::stringstream ss;
     ss << prefix << " (R_type): {\n";
     ss << "    opcode: " << opcode << "\n";
+    ss << "    rs1: " << Register::GetRegName(rs1) << "\n";
+    ss << "    rs2: " << Register::GetRegName(rs2) << "\n";
+    ss << "    rd: " << Register::GetRegName(rd) << "\n";
     ss << "}" << std::endl;
     return ss.str();
 }
@@ -26,6 +30,8 @@ std::string Decoder::S::Dump(const std::string &prefix)
     std::stringstream ss;
     ss << prefix << " (S_type): {\n";
     ss << "    opcode: " << opcode << "\n";
+    ss << "    rs1: " << Register::GetRegName(rs1) << "\n";
+    ss << "    rs2: " << Register::GetRegName(rs2) << "\n";
     ss << "}" << std::endl;
     return ss.str();
 }

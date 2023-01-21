@@ -9,7 +9,7 @@ MMU::MMU(const std::string& elfFileName)
     ElfLoader loader(elfFileName);
 
     LoadElfData(loader);
-    entry_ = loader.GetMainEntryPoint();
+    entry_ = loader.GetEntryPoint();
 }
 
 void MMU::LoadElfData(const ElfLoader &loader)

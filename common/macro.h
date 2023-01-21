@@ -7,9 +7,28 @@
 
 #define ASSERT(x) assert(x)
 
+enum class LoggerComponent
+{
+    MMU,
+    INTERPRETER,
+};
+
+static constexpr bool ComponentEnabled(LoggerComponent comp)
+{
+    switch (comp)
+    {
+        // case LoggerComponent::MMU:
+        case LoggerComponent::INTERPRETER:
+            return true;
+        default:
+            return false;
+    }
+}
+
 #ifndef NDEBUG
 #define LOG_DEBUG(component, msg) \
 {                                                               \
+    if (ComponentEnabled(LoggerComponent::component))           \
     std::cout << "[" << #component << "] " << msg << std::endl; \
 }
 #else

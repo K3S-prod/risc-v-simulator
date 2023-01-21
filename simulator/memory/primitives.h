@@ -23,28 +23,36 @@ struct PAddr {
         ppn_1 : 10;
 };
 struct VAddr {
-    VAddr ()
+    VAddr()
     {
         uint32_t addr = 0;
         std::memcpy(this, &addr, sizeof(uint32_t));
     }
-    VAddr (uint32_t addr)
+    VAddr(int32_t addr)
     {
         std::memcpy(this, &addr, sizeof(uint32_t));
     }
-    VAddr (uint64_t addr)
+    VAddr(uint32_t addr)
+    {
+        std::memcpy(this, &addr, sizeof(uint32_t));
+    }
+    VAddr(uint64_t addr)
     {
         std::memcpy(this, &addr, sizeof(uint32_t));
     }
 
-    uint32_t ToReg()
+    uint32_t ToReg() const
     {
-        uint32_t reg = 0;
-        reg |= vpn_1;
-        reg <<= 10U;
-        reg |= vpn_0;
-        reg <<= 12U;
-        reg |= offs;
+        auto reg = *reinterpret_cast<const uint32_t *>(this);
+#ifndef NDEBUG
+        uint32_t check_reg = 0;
+        check_reg |= vpn_1;
+        check_reg <<= 10U;
+        check_reg |= vpn_0;
+        check_reg <<= 12U;
+        check_reg |= offs;
+        ASSERT(check_reg == reg);
+#endif  // NDEBUG
         return reg;
     }
     uint32_t 

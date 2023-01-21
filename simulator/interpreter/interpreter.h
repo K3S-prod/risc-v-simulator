@@ -1,56 +1,76 @@
 #ifndef SIMULATOR_INTERPRETER_INTERPRETER
 #define SIMULATOR_INTERPRETER_INTERPRETER
 
+#include "register.h"
+#include "simulator/memory/mmu.h"
+
 #include <cstdint>
 #include <cstddef>
 #include <array>
-#include "simulator/memory/mmu.h"
 
 namespace sim {
-
+class Simulator;
 class Interpreter {
 public:
-    using reg_t = uint32_t;
-
     struct State {
-        std::array<reg_t, 31> x_regs {};
-        reg_t pc;
+        std::array<Register, 31> x_regs {};
+        Register pc;
     };
 
 public:
-    Interpreter(MMU *mmu) : mmu_(mmu) {}
+    Interpreter(Simulator *runtime, MMU *mmu);
 
-    reg_t GetReg(uint8_t id)
+    Register GetReg(uint8_t id)
     {
         if (id == 0) {
-            return reg_t(0);
+            return Register(0);
         }
         return state_.x_regs[id - 1U];
     }
-    void SetReg(uint8_t id, reg_t v)
+    void SetReg(uint8_t id, Register v)
     {
         if (id != 0) {
             state_.x_regs[id - 1U] = v;
         }
     }
-    reg_t GetPc()
+    Register GetPc()
     {
         return state_.pc;
     }
-    void SetPc(reg_t v)
+    void SetPc(Register v)
     {
         state_.pc = v;
     }
-    void AdvancePc(reg_t v)
+    void AdvancePc(Register v)
     {
         state_.pc += v;
     }
 
-    int Invoke();
+    int Invoke()
+    {
+        no_breaking_dispatch_();
+        return 0;
+    }
+
+    void InvokeBreakpointed()
+    {
+        num_exected_insts_ = 0;
+        breakpointed_dispatch_();
+    }
+
+    void SetNumInstsToExec(size_t n)
+    {
+        num_insts_to_exec_ = n;
+    }
 
 private:
     State state_;
     MMU *mmu_;
+    std::function<void()> no_breaking_dispatch_;
+    std::function<void()> breakpointed_dispatch_;
+    Simulator *runtime_;
+    size_t num_insts_to_exec_;
+    size_t num_exected_insts_;
 };
 
 

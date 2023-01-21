@@ -22,6 +22,7 @@ public:
     }
     Page *GetPage(VAddr vaddr)
     {
+        ASSERT(vaddr.ToReg() < 0xC0000000);
         return memory_.GetPage(vaddr);
     }
     VAddr GetEntryPoint()

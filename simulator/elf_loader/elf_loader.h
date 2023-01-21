@@ -12,7 +12,13 @@ class ElfLoader {
 public:
     ElfLoader(const std::string& elfFileName);
     int LoadFromFile();
-    VAddr GetMainEntryPoint();
+    VAddr GetEntryPoint()
+    {
+        return elf_file_.get_entry();
+    }
+
+    VAddr GetMainEntryPoint();  // deprecated;
+
     const auto &GetElfFile() const
     {
         return elf_file_;
