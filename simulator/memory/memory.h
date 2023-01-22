@@ -21,7 +21,7 @@ public:
     void store(uint64_t value, VAddr virtAddr);
     uint64_t load(VAddr virtAddr);
     
-    uint32_t GenPPN(uint16_t ppn_1, uint16_t ppn_0)
+    static uint32_t GenPPN(uint16_t ppn_1, uint16_t ppn_0)
     {
         // Change this to 12 bits:
         constexpr uint16_t PPN_1_INV_MASK = 0b1111110000000000;

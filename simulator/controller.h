@@ -9,11 +9,13 @@ public:
     enum class Command {
         INVALID,
         NEXT,
-        NEXT_SEVERAL,
+        STEP,
+        STEP_SEVERAL,
         CONTINUE,
         QUIT,
         REG_PRINT,
         SET_BREAKPOINT,
+        DEL_BREAKPOINT,
     };
 
     void RequireCommand() {
@@ -25,9 +27,11 @@ public:
             case 'n':
                 cmd_ = Command::NEXT;
                 break;
-            
-            case 'N':
-                cmd_ = Command::NEXT_SEVERAL;
+            case 's':
+                cmd_ = Command::STEP;
+                break;
+            case 'S':
+                cmd_ = Command::STEP_SEVERAL;
                 std::cin >> num_;
                 if (std::cin.peek() != '\n') {
                     std::string str;
@@ -58,6 +62,16 @@ public:
 
             case 'b':
                 cmd_ = Command::SET_BREAKPOINT;
+                std::cin >> std::hex >> num_ >> std::dec;
+                if (std::cin.peek() != '\n') {
+                    std::string str;
+                    std::cin >> str;
+                    std::cout << "Unexpected: '" << str << "'" <<std::endl;
+                    cmd_ = Command::INVALID;
+                }
+                break;
+            case 'd':
+                cmd_ = Command::DEL_BREAKPOINT;
                 std::cin >> std::hex >> num_ >> std::dec;
                 if (std::cin.peek() != '\n') {
                     std::string str;

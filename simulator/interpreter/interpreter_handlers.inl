@@ -275,7 +275,7 @@
         LOG_DEBUG(INTERPRETER, I().Dump(GetPc().DumpHex() + " ADDI"));
 
         auto rs1 = GetReg(I().rs1);
-        auto imm = 0;
+        uint32_t imm = 0;
         GET_I_IMM(imm);
         
         SetReg(I().rd, rs1 + SIGNED(imm));
@@ -595,6 +595,10 @@
     
     I_EBREAK: {
         LOG_DEBUG(INTERPRETER, I().Dump(GetPc().DumpHex() + " EBREAK"));
+        runtime_->StopTimer();
+        LOG(RUNTIME, "Program exited with code: " << GetReg(10U));
+        LOG(RUNTIME, "Exec time: " << runtime_->GetTimeMS());
+        LOG(RUNTIME, "Insts executed: " << num_executed_insts_);
         return;
     }
     

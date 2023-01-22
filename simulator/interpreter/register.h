@@ -58,6 +58,8 @@ public:
             case 31: {
                 return std::string("t") + std::to_string(reg_id - 25);
             }
+            default:
+                UNREACHABLE();
         }
     }
     std::string DumpHex() const

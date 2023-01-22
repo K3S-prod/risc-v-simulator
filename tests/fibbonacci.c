@@ -26,4 +26,5 @@ int fibbonaci(int num) {
 int main() {
     int result = 0;
     result = fibbonaci(11);
+    return result;
 }

@@ -59,4 +59,12 @@ Running simulator:
 ```shell
 cd build
 ./bin/simulator <elf_filename>
+
+# Example output:
+$ cd build
+$ ./bin/simulator ./bin/fibbonacci_riscv
+(rvsim) c
+[RUNTIME] Program exited with code: 0
+[RUNTIME] Exec time: 0.202988
+[RUNTIME] Insts executed: 4253
 ```

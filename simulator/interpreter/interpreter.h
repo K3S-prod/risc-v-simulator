@@ -48,13 +48,14 @@ public:
 
     int Invoke()
     {
+        num_executed_insts_ = 0;
         no_breaking_dispatch_();
         return 0;
     }
 
     void InvokeBreakpointed()
     {
-        num_exected_insts_ = 0;
+        num_executed_insts_ = 0;
         breakpointed_dispatch_();
     }
 
@@ -62,15 +63,32 @@ public:
     {
         num_insts_to_exec_ = n;
     }
+    size_t GetNumInstsToExec()
+    {
+        return num_insts_to_exec_;
+    }
+
+    void SaveSP()
+    {
+        saved_sp_ = state_.x_regs[1];
+    }
+    void ClearSavedSP()
+    {
+        saved_sp_ = 0;
+    }
+
 
 private:
-    State state_;
-    MMU *mmu_;
+    State state_{};
+    MMU *mmu_{};
     std::function<void()> no_breaking_dispatch_;
     std::function<void()> breakpointed_dispatch_;
-    Simulator *runtime_;
-    size_t num_insts_to_exec_;
-    size_t num_exected_insts_;
+    Simulator *runtime_{};
+
+    // Exec-controll members (breakpoints, trackers, etc.):
+    size_t num_insts_to_exec_{};
+    size_t num_executed_insts_{};
+    VAddr saved_sp_{};
 };
 
 

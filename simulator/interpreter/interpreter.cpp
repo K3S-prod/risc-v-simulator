@@ -40,36 +40,41 @@ namespace sim {
 
 #define GET_J_IMM(imm) \
 {                                                                       \
-    for (int i = 20; i < 32; ++i) {                                     \
-        imm |= J().imm_20 << i;                                         \
-    }                                                                   \
-    imm |= J().imm_19_12 << 12 | J().imm_11 << 11 | J().imm_10_1 << 1;  \
+    ASSERT(imm == 0);                                       \
+    imm = J().imm_10_1 << 1 | J().imm_11 << 11 | J().imm_19_12 << 12;    \
+    if (J().imm_20) {                   \
+        imm |= 0xFFF00000;                      \
+    }                                           \
 }
 
 #define GET_B_IMM(imm) \
 {                                                                       \
-    for (int i = 12; i < 32; ++i) {                                     \
-        imm |= B().imm_12 << i;                                         \
-    }                                                                   \
-    imm |= B().imm_4_1 << 1 | B().imm_10_5 << 5 | B().imm_11 << 11;     \
+    ASSERT(imm == 0);                                       \
+    imm = B().imm_4_1 << 1 | B().imm_10_5 << 5 | B().imm_11 << 11;                              \
+    constexpr uint32_t BIT_11_MASK = 0x800;             \
+    if (B().imm_12) {                   \
+        imm |= 0xFFFFF800;                      \
+    }                                           \
 }
 
 #define GET_I_IMM(imm) \
 {                                                                       \
-    imm = I().imm_11_0;                                                 \
-    uint32_t sign_bit = imm >> 11;                                      \
-    for (int i = 12; i < 32; ++i) {                                     \
-        imm |= sign_bit << i;                                           \
-    }                                                                   \
+    ASSERT(imm == 0);                                       \
+    constexpr uint32_t BIT_11_MASK = 0x800;             \
+    if (I().imm_11_0 & BIT_11_MASK) {                   \
+        imm |= 0xFFFFF800;                      \
+    }                                           \
+    imm |= I().imm_11_0;                                                 \
 }
 
 #define GET_S_IMM(imm) \
 {                                                                       \
+    ASSERT(imm == 0);                                       \
     imm = S().imm_4_0 | S().imm_11_5 << 5;                              \
-    uint32_t sign_bit = imm >> 11;                                      \
-    for (int i = 12; i < 32; ++i) {                                     \
-        imm |= sign_bit << i;                                           \
-    }                                                                   \
+    constexpr uint32_t BIT_11_5_MASK = 0x40;  \
+    if (S().imm_11_5 & BIT_11_5_MASK) {                   \
+        imm |= 0xFFFFF800;                      \
+    }                                           \
 }
 
 #define DECL_DISPATCH_IDX() \
@@ -83,6 +88,7 @@ Interpreter::Interpreter(Simulator *runtime, MMU *mmu) : mmu_(mmu), runtime_(run
     // Declare No-breaking invoke type:
     #define DISPATCH() \
     {                                        \
+        num_executed_insts_++;               \
         DECL_DISPATCH_IDX();                 \
         goto *DISPATCH_TABLE[dispatch_idx];  \
     }
@@ -93,22 +99,29 @@ Interpreter::Interpreter(Simulator *runtime, MMU *mmu) : mmu_(mmu), runtime_(run
 
     // Declare invoke type with breakpoints supported:
     #define DISPATCH() \
-    {                                               \
-        if (runtime_->IsBreakpoint(GetPc()) &&      \
-            (num_exected_insts_ != 0)) {            \
-            /* Pass control to the runtime: */      \
-            return;                                 \
-        }                                           \
-        if (num_insts_to_exec_ == 0) {              \
-            /* Pass control to the runtime: */      \
-            return;                                 \
-        }                                           \
-        if (num_insts_to_exec_ != ((size_t) - 1)) { \
-            num_insts_to_exec_--;                   \
-        }                                           \
-        num_exected_insts_++;                       \
-        DECL_DISPATCH_IDX();                        \
-        goto *DISPATCH_TABLE[dispatch_idx];         \
+    {                                                                   \
+        if (runtime_->IsBreakpoint(GetPc()) &&                          \
+            (num_executed_insts_ != 0)) {                                \
+            /* Pass control to the runtime: */                          \
+            std::cout << "Hit breakpoint  0x" <<                        \
+             std::hex << std::setfill('0') <<                           \
+             std::setw(8) << GetPc() << std::dec <<                     \
+             std::endl;                                                 \
+            return;                                                     \
+        }                                                               \
+        if (runtime_->IsBreakpointForCmdNext(GetPc(), GetReg(2U))) {    \
+            return;                                                     \
+        }                                                               \
+        if (num_insts_to_exec_ == 0) {                                  \
+            /* Pass control to the runtime: */                          \
+            return;                                                     \
+        }                                                               \
+        if (num_insts_to_exec_ != ((size_t) - 1)) {                     \
+            num_insts_to_exec_--;                                       \
+        }                                                               \
+        num_executed_insts_++;                                          \
+        DECL_DISPATCH_IDX();                                            \
+        goto *DISPATCH_TABLE[dispatch_idx];                             \
     }
     breakpointed_dispatch_ = 
     #include "interpreter_handlers.inl"

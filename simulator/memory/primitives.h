@@ -41,6 +41,10 @@ struct VAddr {
         std::memcpy(this, &addr, sizeof(uint32_t));
     }
 
+    uint32_t GenVPN() const
+    {
+        return ToReg() >> 12;
+    }
     uint32_t ToReg() const
     {
         auto reg = *reinterpret_cast<const uint32_t *>(this);
